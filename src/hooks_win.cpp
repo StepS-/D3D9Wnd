@@ -164,7 +164,7 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wKeyCode, LPARAM lParam)
 					else if (wKeyCode >= VK_LEFT && wKeyCode <= VK_DOWN)
 						SetWindowPos(WA.Wnd.MFC, NULL,
 						xpos + Env.EasterEgg.Multiplier * (wKeyCode % 2)       * (-VK_UP   + wKeyCode),
-						ypos + Env.EasterEgg.Multiplier * ((wKeyCode + 1) % 2) * (-VK_LEFT + wKeyCode),
+						ypos + Env.EasterEgg.Multiplier * ((wKeyCode + 1) % 2) * (-VK_RIGHT + wKeyCode),
 						0, 0, SWP_NOSIZE | SWP_NOZORDER);
 
 					else if (wKeyCode == 'Z')

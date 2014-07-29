@@ -169,7 +169,7 @@ struct D3D9wnd_environment{
 			FrontendHidden,
 			InControl;
 		INT32
-			Multiplier;
+			Multiplier = 1;
 	} EasterEgg;
 };
 
