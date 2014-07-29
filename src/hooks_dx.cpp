@@ -241,29 +241,33 @@ BOOL __stdcall SetWndParam(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx
 	if (InGame())
 	{
 		qFileLog("SetWndParam: Preparing to handle in-game.");
-		if (Settings.IG.WindowBorder && !Settings.IG.Stretch && WA.BB.Width < Env.Act.ResX && WA.BB.Height < Env.Act.ResY)
-		{
-			RECT ClRect = { X, Y, cx, cy };
-			DWORD Style = GetWindowLong(hWnd, GWL_STYLE) | WS_CAPTION;
-			AdjustWindowRect(&ClRect, Style, 0);
-			cx = ClRect.right - ClRect.left;
-			cy = ClRect.bottom - ClRect.top;
-
-			if (cx <= Env.Act.ResX || cy <= Env.Act.ResY)
-				SetWindowLong(hWnd, GWL_STYLE, Style &~WS_MAXIMIZEBOX);
-			else Settings.IG.WindowBorder = 0;
-
-			if (Settings.IG.WindowBorder)
-				fFileLog("SetWndParam: Window border was enabled, the related checks have been done, and rect adjusted. New window size: %dx%d.", cx, cy);
-			else
-				qFileLog("SetWndParam: Window border was enabled, but it's too big for the requested window size/mode. It has now been disabled.");
-		}
-		else
-			qFileLog("SetWndParam: Window border is either disabled or is too big for the requested window size/mode.");
 
 		if (!InGameHandled)
 		{
 			InGameHandled = true;
+
+			if (Settings.IG.WindowBorder && !Settings.IG.Stretch && WA.BB.Width < Env.Act.ResX && WA.BB.Height < Env.Act.ResY)
+			{
+				RECT ClRect = { X, Y, cx, cy };
+				DWORD Style = GetWindowLong(hWnd, GWL_STYLE) | WS_CAPTION;
+				AdjustWindowRect(&ClRect, Style, 0);
+				cx = ClRect.right - ClRect.left;
+				cy = ClRect.bottom - ClRect.top;
+
+				if (cx <= Env.Act.ResX || cy <= Env.Act.ResY)
+				{
+					SetWindowLong(hWnd, GWL_STYLE, Style &~WS_MAXIMIZEBOX);
+					fFileLog("SetWndParam: Window border was enabled, the related checks have been done, and rect adjusted. New window size: %dx%d.", cx, cy);
+				}
+				else
+				{
+					Settings.IG.WindowBorder = 0;
+					qFileLog("SetWndParam: Window border was enabled, but it's too big for the requested window size/mode. It has now been disabled.");
+				}
+					
+			}
+			else
+				qFileLog("SetWndParam: Window border is either disabled or is too big for the requested window size/mode.");
 
 			qFileLog("SetWndParam: Entering in-game and adjusting everything that we need.");
 
