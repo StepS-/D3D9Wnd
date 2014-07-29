@@ -1,0 +1,111 @@
+
+#include "misc.h"
+#include "notifications.h"
+
+char Config[MAX_PATH];
+
+#ifdef LOGGING
+FILE* LOG_FILE = 0;
+#endif
+
+BYTE eCI = 0;
+
+D3D9Info d3d9;
+DSound_stuff dsound;
+D3D9Wnd_settings Settings;
+WA_info WA;
+Memory_addresses Offsets;
+D3D9wnd_environment Env;
+
+BOOL UpdateWACaption(int SizeX, int SizeY, BOOL TopmostState, LONG MousePinnedState, BOOL ActiveBgState)
+{
+	if (InGame() && Settings.IG.QuickInfo)
+	{
+		qFileLog("Updating the W:A window caption.");
+		char watext[256];
+
+		sprintf_s(watext, "Worms Armageddon (windowed) | %u x %u | %s | %s | Active bg %s", SizeX, SizeY,
+			TopmostState ? "Topmost" : "No topmost", MousePinnedState >= 0 ? "Unpinned" : "Pinned",
+			ActiveBgState ? "ON" : "OFF");
+
+		return SetWindowText(WA.Wnd.DX, watext);
+	}
+	return 0;
+}
+
+BOOL MinimizeWA()
+{
+	if (!IsWindowEnabled(WA.Wnd.DX)) EnableWindow(WA.Wnd.DX, 1);
+
+	qFileLog("Minimizing the game via a hook.");
+
+	return ShowWindow(WA.Wnd.DX, SW_MINIMIZE);
+}
+
+BOOL StickW2Wnd()
+{
+	RECT WArect;
+	GetClientRect(WA.Wnd.DX, &WArect);
+	ClientToScreen(WA.Wnd.DX, (POINT*)&WArect);
+
+	qFileLog("Worms2D window has follolowed the game window.");
+	return SetWindowPos(WA.Wnd.W2D, NULL, WArect.left, WArect.top, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+}
+
+BOOL ChangeTopmostState()
+{
+	Settings.Misc.NoTopmost = !Settings.Misc.NoTopmost;
+	SetWindowPos(WA.Wnd.DX, HWND(-1 - Settings.Misc.NoTopmost), 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+
+	fFileLog("Switch to %s triggered via keyboard.", Settings.Misc.NoTopmost ? "no topmost" : "topmost");
+
+	UpdateWACaption(WA.BB.Width, WA.BB.Height, !Settings.Misc.NoTopmost, ShowCursorCount(), Settings.IG.Background);
+
+	return Settings.Misc.NoTopmost;
+}
+
+BOOL FancyUpdate()
+{
+	BOOL result = 0;
+	if (Settings.Misc.FancyStartup)
+	{
+		result = SetWindowTransparencyLevel(WA.Wnd.DX, eCI * 17);
+		if (eCI >= 15) {
+			SetWindowLong(WA.Wnd.DX, GWL_EXSTYLE, GetWindowLong(WA.Wnd.DX, GWL_EXSTYLE) &~WS_EX_LAYERED);
+			Settings.Misc.FancyStartup = 0;
+		}
+
+		fFileLog("FancyStartup update frame %u.", eCI);
+
+		eCI++;
+	}
+	return result;
+}
+
+D3D9Info::D3D9Info() {}
+D3D9Info::~D3D9Info() {}
+
+BOOL D3D9Info::RefreshInterface(IDirect3D9* lpObject)
+{
+	if (lpObject)
+	{
+		obj.handle = lpObject;
+		obj.CreateDevice = VMTEntry(lpObject, __CreateDevice);
+		return 1;
+	}
+	return 0;
+}
+
+BOOL D3D9Info::RefreshDevice(IDirect3DDevice9* lpDevice)
+{
+	if (lpDevice)
+	{
+		device.handle = lpDevice;
+		device.GetRasterStatus = VMTEntry(lpDevice, __GetRasterStatus);
+		device.Present = VMTEntry(lpDevice, __Present);
+		device.Release = VMTEntry(lpDevice, __Release);
+		device.Reset = VMTEntry(lpDevice, __Reset);
+		return 1;
+	}
+	return 0;
+}

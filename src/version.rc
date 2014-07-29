@@ -1,0 +1,29 @@
+
+#define APSTUDIO_READONLY_SYMBOLS
+#include "winres.h"
+#undef APSTUDIO_READONLY_SYMBOLS
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 0,6,2,9
+ PRODUCTVERSION 0,6,2,9
+ FILEOS 0x4L
+ FILETYPE 0x2L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "FileDescription", "A windowed mode based on W:A 3.7+ Direct3D 9 renderer."
+            VALUE "FileVersion", "0.6.2.9"
+            VALUE "InternalName", "wkD3D9Wnd"
+            VALUE "LegalCopyright", "(C) StepS, Kawoosh"
+            VALUE "OriginalFilename", "wkD3D9Wnd.dll"
+            VALUE "ProductName", "wkD3D9Wnd"
+            VALUE "ProductVersion", "0.6.2.9"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409 0x4B0
+    END
+END
