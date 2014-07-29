@@ -8,7 +8,7 @@
 #pragma comment (lib, "MinHook\\MinHook.x86.lib")
 #endif
 
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
+BOOL APIENTRY DllMain(HMODULE, DWORD ul_reason_for_call, LPVOID)
 {
 	if (ul_reason_for_call == DLL_PROCESS_ATTACH)
 		return InitializeD3D9Wnd();

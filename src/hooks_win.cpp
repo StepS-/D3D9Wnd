@@ -1,15 +1,13 @@
 
 #include "hooks_win.h"
 #include "hooks_api.h"
-#include "tools/tools.h"
+#include "tools\tools.h"
 #include "misc.h"
 
 HHOOK hkb, hkb2, hkb3;
 
 LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wKeyCode, LPARAM lParam)
 {
-	PBYTE kstate = 0;
-
 	if (HC_ACTION == nCode && !!!(lParam & INT_MIN))
 	{
 		if (InGame())

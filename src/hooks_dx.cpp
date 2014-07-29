@@ -1,7 +1,7 @@
 
 #include "hooks_dx.h"
 #include "MinHook\MinHook.h"
-#include "tools/tools.h"
+#include "tools\tools.h"
 #include "misc.h"
 #include "notifications.h"
 #include "init.h"

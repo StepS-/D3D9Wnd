@@ -21,7 +21,6 @@ extern "C" IMAGE_DOS_HEADER __ImageBase;
 #define ShowCursorCount GetCursorCounter
 #define ShowCursorN SetCursorCounter
 #define QV MAKEQWORD
-#define DoNothing do {} while (0)
 
 #define VMTEntry(ObjPtr, EntryNum) (*(PVOID*)(*(PDWORD)ObjPtr + EntryNum*sizeof(ULONG)))
 

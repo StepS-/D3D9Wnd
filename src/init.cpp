@@ -2,7 +2,7 @@
 #include "misc.h"
 #include <d3d9.h>
 #include "MinHook\MinHook.h"
-#include "tools/tools.h"
+#include "tools\tools.h"
 #include "init.h"
 #include "notifications.h"
 #include "hooks_win.h"
@@ -39,7 +39,7 @@ BOOL InitializeD3D9Wnd()
 	if (!EnableDPIAwareness())     qFileLog("The game's process doesn't need to be set DPI-aware.");
 	else                           qFileLog("The game's process has been made DPI-aware.");
 
-	if (Env.Sys.DwmEnabled = DWMEnabled()) qFileLog("DWM desktop composition is enabled.");
+	if ((Env.Sys.DwmEnabled = DWMEnabled()) != 0) qFileLog("DWM desktop composition is enabled.");
 	else                           qFileLog("DWM desktop composition is disabled.");
 
 	if (LoadLibrary("wkWndMode.dll"))
@@ -52,8 +52,8 @@ BOOL InitializeD3D9Wnd()
 	WA.Version = GetWAVersion(); fFileLog("Detected the game version: %u.%u.%u.%u",
 		PWORD(&WA.Version)[2], PWORD(&WA.Version)[3], PWORD(&WA.Version)[0], PWORD(&WA.Version)[1]);
 
-	if (WA.Steam = SteamCheck()) qFileLog("User is running the Steam edition of the game.");
-	else                         qFileLog("User is running the CD edition of the game.");
+	if ((WA.Steam = SteamCheck()) != 0) qFileLog("User is running the Steam edition of the game.");
+	else								qFileLog("User is running the CD edition of the game.");
 		
 	if (WA.Version < QV(3,6,31,22))
 	{
@@ -77,7 +77,7 @@ BOOL InitializeD3D9Wnd()
 		return 1;
 	}
 
-	if (d3d9.dll = LoadLibrary("d3d9.dll"))
+	if ((d3d9.dll = LoadLibrary("d3d9.dll")) != 0)
 	{
 		qFileLog("Successfully loaded the d3d9.dll library.");
 
@@ -468,7 +468,7 @@ BOOL __stdcall InstallHooks()
 		if (Settings.Misc.SoundInBackground && !dsound.dll)
 		{
 			qFileLog("SoundInBackground is enabled: hooking the necessary things.");
-			if (dsound.dll = LoadLibrary("dsound.dll"))
+			if ((dsound.dll = LoadLibrary("dsound.dll")) != 0)
 			{
 				qFileLog("Successfully loaded the dsound.dll library.");
 				DSOUNDCREATE DirectSoundCreate = (DSOUNDCREATE)GetProcAddress(dsound.dll, "DirectSoundCreate");

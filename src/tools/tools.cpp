@@ -76,7 +76,7 @@ LPSTR GetPathUnderModuleA(HMODULE hModule, CHAR OutBuf[MAX_PATH], LPCSTR FileNam
 {
 	CHAR* dirend;
 	if (GetModuleFileNameA(hModule, OutBuf, MAX_PATH))
-	if (dirend = strrchr(OutBuf, '\\'))
+	if ((dirend = strrchr(OutBuf, '\\')) != 0)
 	{
 		strcpy_s(dirend + sizeof(CHAR), MAX_PATH, FileName);
 		return OutBuf;
@@ -88,7 +88,7 @@ LPWSTR GetPathUnderModuleW(HMODULE hModule, WCHAR OutBuf[MAX_PATH], LPCWSTR File
 {
 	WCHAR* dirend;
 	if (GetModuleFileNameW(hModule, OutBuf, MAX_PATH))
-	if (dirend = wcsrchr(OutBuf, L'\\'))
+	if ((dirend = wcsrchr(OutBuf, L'\\')) != 0)
 	{
 		wcscpy_s(dirend + sizeof(WCHAR), MAX_PATH, FileName);
 		return OutBuf;
@@ -323,7 +323,7 @@ DWORD GetRegistryDwordA(HKEY hKey, LPCSTR lpSubKey, LPCSTR lpValueName, DWORD dw
 	{
 		DWORD regdword = REG_DWORD;
 		DWORD dwSize = sizeof(DWORD);
-		LSTATUS lQueryResult = RegQueryValueExA(hTargetKey, lpValueName, NULL, &regdword, (LPBYTE)&dwResult, &dwSize);
+		RegQueryValueExA(hTargetKey, lpValueName, NULL, &regdword, (LPBYTE)&dwResult, &dwSize);
 		RegCloseKey(hTargetKey);
 	}
 
@@ -340,7 +340,7 @@ DWORD GetRegistryDwordW(HKEY hKey, LPCWSTR lpSubKey, LPCWSTR lpValueName, DWORD 
 	{
 		DWORD regdword = REG_DWORD;
 		DWORD dwSize = sizeof(DWORD);
-		LSTATUS lQueryResult = RegQueryValueExW(hTargetKey, lpValueName, NULL, &regdword, (LPBYTE)&dwResult, &dwSize);
+		RegQueryValueExW(hTargetKey, lpValueName, NULL, &regdword, (LPBYTE)&dwResult, &dwSize);
 		RegCloseKey(hTargetKey);
 	}
 
@@ -503,8 +503,8 @@ BOOL CmdOption(LPCSTR lpCmdOption) // from WormKitDS
 		BOOLEAN in_QM = FALSE, in_TEXT = FALSE, in_SPACE = TRUE;
 		int st, en;
 		char tmp[16];
-		int i = 0, j = 0;
-		while (1) {
+		int i = 0, j = 0, n = 1;
+		while (n) {
 			char a = cmd[i];
 			if (in_QM) {
 				if (a == '\"') { in_QM = FALSE; }

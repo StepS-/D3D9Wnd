@@ -1,6 +1,6 @@
 
 #include "notifications.h"
-#include "tools/tools.h"
+#include "tools\tools.h"
 char walanguage[32];
 
 void M_TooSmallWidth(HWND hWnd)

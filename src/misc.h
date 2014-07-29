@@ -4,15 +4,16 @@
 #include <stdio.h>
 #include <d3d9.h>
 #include <dsound.h>
-#include "tools/tools.h"
+#include "tools\tools.h"
 
 #ifdef LOGGING
 extern FILE* LOG_FILE;
 #define fFileLog(Format, ...) LogToFileA(LOG_FILE, Format, __VA_ARGS__)
 #define qFileLog(string) LogToFileA(LOG_FILE, "%s", string)
 #else
-#define fFileLog(Format, ...) DoNothing
-#define qFileLog(string) DoNothing
+#pragma warning( disable : 4390 )
+#define fFileLog(Format, ...)
+#define qFileLog(string)
 #endif
 
 #define InGame() IsWindow(WA.Wnd.W2D)
