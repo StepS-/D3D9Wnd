@@ -386,7 +386,7 @@ HRESULT WINAPI DSoundCreateHook(LPCGUID lpcGuidDevice, LPDIRECTSOUND *ppDS, LPUN
 {
 	fFileLog("DirectSoundCreate hook engaged. LPGUID: 0x%X, ppDS: 0x%X, pUnkOuter: 0x%X", lpcGuidDevice, ppDS, pUnkOuter);
 	HRESULT result = DSoundCreateNext(lpcGuidDevice, ppDS, pUnkOuter);
-	if (!dsound.obj && *ppDS != (PVOID)0xFEEEFEEE)
+	if (SUCCEEDED(result) && !dsound.obj)
 	{
 		dsound.obj = *ppDS;
 		if (MH_CreateHook(VMTEntry(dsound.obj, __CreateSoundBuffer), DSoundCreateSoundBufferHook, (PVOID*)&DSoundCreateSoundBufferNext) != MH_OK)
