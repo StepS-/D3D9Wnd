@@ -179,7 +179,7 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wKeyCode, LPARAM lParam)
 				}
 			}
 
-			else if (wKeyCode = 'T')
+			else if (wKeyCode == 'T')
 				ChangeTopmostState();
 		}
 	}
