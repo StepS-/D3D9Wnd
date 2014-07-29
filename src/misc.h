@@ -183,7 +183,6 @@ extern D3D9wnd_environment Env;
 
 extern D3D9Info d3d9;
 
-HMONITOR GetSecondaryMonitorHandle(int adjust, bool vert);
 BOOL UpdateWACaption(int SizeX, int SizeY, BOOL TopmostState, LONG MousePinnedState, BOOL ActiveBgState);
 BOOL MinimizeWA();
 BOOL StickW2Wnd();
