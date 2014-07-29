@@ -110,7 +110,7 @@ HRESULT WINAPI D3D9CreateDeviceHook(IDirect3D9 *pthis, UINT Adapter, D3DDEVTYPE 
 	fFileLog("Expected backbuffer size: %ux%u", WA.BB.Width, WA.BB.Height);
 
 	SetWindowedMode:
-	if (!Settings.FR.Fullscreen || Settings.FR.AltFullscreen)
+	if (!Settings.FR.Fullscreen || Settings.FR.AltFullscreen || InGame())
 	{
 		pParams->Windowed = TRUE;
 		SetWndParam(pParams->hDeviceWindow, 0, 0, 0, pParams->BackBufferWidth, pParams->BackBufferHeight, SWP_SHOWWINDOW | SWP_NOREDRAW);
