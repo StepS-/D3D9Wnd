@@ -42,6 +42,23 @@ BOOL MinimizeWA()
 	return ShowWindow(WA.Wnd.DX, SW_MINIMIZE);
 }
 
+BOOL ClipCursorInFrontend()
+{
+	if (!InGame() && !IsNullRect(&WA.Rect.MFC))
+	{
+		if (WA.BB.Width && WA.BB.Height)
+		{
+			RECT TestRect = { WA.Rect.MFC.left, WA.Rect.MFC.top, WA.BB.Width, WA.BB.Height };
+			if (WA.BB.Width < WA.Rect.MFC.right - WA.Rect.MFC.left && WA.BB.Height < WA.Rect.MFC.bottom - WA.Rect.MFC.top)
+				return ClipCursor(&TestRect);
+			else
+				return ClipCursor(&WA.Rect.MFC);
+		}
+	}
+	
+	return false;
+}
+
 BOOL StickW2Wnd()
 {
 	RECT WArect;

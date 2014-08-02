@@ -432,6 +432,13 @@ BOOL SetWindowTransparencyLevel(HWND hWnd, BYTE bLevel)
 	return 0;
 }
 
+BOOL IsNullRect(LPRECT lpRect)
+{
+	if (lpRect)
+		return lpRect->left == 0 && lpRect->top == 0 && lpRect->right == 0 && lpRect->bottom == 0;
+	return true;
+}
+
 BOOL RectCat(LPRECT Dest, LPRECT Source)
 {
 	if (Dest && Source)

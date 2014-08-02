@@ -126,6 +126,7 @@ void SetCursorCounter(int value);
 int Mprintf(UINT uType, LPCSTR lpCaption, LPCSTR Format, ...);
 LONG SetScreenRes(int cx, int cy);
 BOOL SetWindowTransparencyLevel(HWND hWnd, BYTE bLevel);
+BOOL IsNullRect(LPRECT lpRect);
 BOOL RectCat(LPRECT Dest, LPRECT Source);
 
 LPCSTR DispChangeErrorStrA(LONG ErrorCode);

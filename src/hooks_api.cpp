@@ -30,16 +30,15 @@ HWND WINAPI CreateDialogIndirectParamANew(HINSTANCE hInstance,LPCDLGTEMPLATEA lp
 		if (!IsWindowEnabled(WA.Wnd.DX))
 			EnableWindow(WA.Wnd.DX, true); //idk
 
-		if (!Settings.FR.Fullscreen && !Settings.FR.AltFullscreen && !Settings.MM.Enable
-			&& (Settings.FR.Stretch || Settings.FR.ArbitrarySizing || Settings.FR.Centered))
-		{
-			RECT WRect = { 0, 0, WA.BB.Width, WA.BB.Height };
-			ClipCursor(&WRect);
-		}
-
 		Env.EasterEgg.FrontendHidden = false;
 		WA.Wnd.MFC = Wnd;
 		GetWindowRect(Wnd, &WA.Rect.MFC);
+
+		if (!Settings.FR.Fullscreen && !Settings.FR.AltFullscreen && !Settings.MM.Enable
+			&& (Settings.FR.Stretch || Settings.FR.ArbitrarySizing || Settings.FR.Centered))
+		{
+			ClipCursorInFrontend();
+		}
 	}
 	ShowWindow(Wnd, SW_SHOW);
 	return Wnd;
@@ -89,7 +88,7 @@ BOOL WINAPI MoveWindowNew(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL
 		{
 			qFileLog("MoveWindow: Preparing to move the frontend window.");
 
-			if (IsWindow(WA.Wnd.MFC))
+			if (IsWindow(WA.Wnd.MFC) && !IsNullRect(&WA.Rect.MFC))
 			{
 				SetWindowPos(WA.Wnd.MFC, NULL, WA.Rect.MFC.left, WA.Rect.MFC.top, WA.Rect.MFC.right-WA.Rect.MFC.left, WA.Rect.MFC.bottom-WA.Rect.MFC.top, SWP_NOMOVE | SWP_NOZORDER);
 				ShowWindow(WA.Wnd.MFC, SW_SHOW);
@@ -106,12 +105,10 @@ BOOL WINAPI MoveWindowNew(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL
 			else
 				SetWindowText(WA.Wnd.DX, "Worms Armageddon (windowed)");
 
-			RECT WRect = { 0, 0, WA.BB.Width, WA.BB.Height };
-
 			if (Settings.FR.Stretch)
 			{
 				if (!Settings.MM.Enable)
-					ClipCursor(&WRect);
+					ClipCursorInFrontend();
 
 				X = 0;
 				Y = 0;
@@ -135,7 +132,7 @@ BOOL WINAPI MoveWindowNew(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL
 
 				else
 				{
-					ClipCursor(&WRect);
+					ClipCursorInFrontend();
 					X = MinCap((Env.Sys.PrimResX / 2) - (WA.BB.Width / 2), 0);
 					Y = MinCap((Env.Sys.PrimResY / 2) - (WA.BB.Height / 2), 0);
 
@@ -145,7 +142,7 @@ BOOL WINAPI MoveWindowNew(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL
 
 			else if (Settings.FR.ArbitrarySizing)
 			{
-				ClipCursor(&WRect);
+				ClipCursorInFrontend();
 				nWidth = MaxCap(Settings.FR.Xsize, Env.Sys.PrimResX);
 				nHeight = MaxCap(Settings.FR.Ysize, Env.Sys.PrimResY);
 
