@@ -109,7 +109,10 @@ HRESULT WINAPI D3D9ResetHook(IDirect3DDevice9* pthis, D3DPRESENT_PARAMETERS *pPa
 	fFileLog("Expected backbuffer size: %ux%u", WA.BB.Width, WA.BB.Height);
 
 	if (!Settings.FR.Fullscreen || Settings.FR.AltFullscreen || InGame())
+	{
 		pParams->Windowed = TRUE;
+		SetWindowPos(pParams->hDeviceWindow, 0, 0, 0, pParams->BackBufferWidth, pParams->BackBufferHeight, SWP_SHOWWINDOW | SWP_NOREDRAW | SWP_NOZORDER | SWP_NOMOVE);
+	}
 
 	HRESULT result = D3D9ResetNext(pthis, pParams);
 	if (SUCCEEDED(result))
