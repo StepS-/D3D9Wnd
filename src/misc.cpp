@@ -126,3 +126,27 @@ BOOL D3D9Info::RefreshDevice(IDirect3DDevice9* lpDevice)
 	}
 	return 0;
 }
+
+HRESULT D3D9Info::CheckFullscreenMode(UINT Adapter, D3DPRESENT_PARAMETERS *pParams)
+{
+	if (obj.handle)
+	{
+		if (pParams)
+		{
+			ULONG dwCount = obj.handle->GetAdapterModeCount(Adapter, pParams->BackBufferFormat);
+			D3DDISPLAYMODE DisplayMode;
+			for (ULONG i = 0; i < dwCount; i++)
+			{
+				if (SUCCEEDED(obj.handle->EnumAdapterModes(Adapter, pParams->BackBufferFormat, i, &DisplayMode)))
+				if (DisplayMode.Width == pParams->BackBufferWidth && DisplayMode.Height == pParams->BackBufferHeight
+					&& DisplayMode.Format == pParams->BackBufferFormat)
+				{
+					return D3D_OK;
+				}
+			}
+			return D3DERR_NOTAVAILABLE;
+		}
+		return D3DERR_INVALIDCALL;
+	}
+	return -1;
+}

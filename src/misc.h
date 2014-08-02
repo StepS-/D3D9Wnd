@@ -47,6 +47,7 @@ public:
 
 	BOOL RefreshInterface(IDirect3D9* lpObject);
 	BOOL RefreshDevice(IDirect3DDevice9* lpDevice);
+	HRESULT CheckFullscreenMode(UINT Adapter, D3DPRESENT_PARAMETERS *pParams);
 
 	HMODULE dll;
 	struct{

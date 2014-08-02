@@ -127,6 +127,8 @@ HRESULT WINAPI D3D9CreateDeviceHook(IDirect3D9 *pthis, UINT Adapter, D3DDEVTYPE 
 {
 	qFileLog("Attempting to create IDirect3DDevice9: hook engaged.");
 
+	BOOL bResTested = 0;
+
 	WA.BB.Width = pParams->BackBufferWidth;
 	WA.BB.Height = pParams->BackBufferHeight;
 
@@ -139,6 +141,7 @@ HRESULT WINAPI D3D9CreateDeviceHook(IDirect3D9 *pthis, UINT Adapter, D3DDEVTYPE 
 		SetWndParam(pParams->hDeviceWindow, 0, 0, 0, pParams->BackBufferWidth, pParams->BackBufferHeight, SWP_SHOWWINDOW | SWP_NOREDRAW);
 	}
 
+	CreateDevice:
 	HRESULT result = D3D9CreateDeviceNext(pthis, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pParams, ppReturnedDeviceInterface);
 	if (SUCCEEDED(result))
 	{
@@ -207,32 +210,30 @@ HRESULT WINAPI D3D9CreateDeviceHook(IDirect3D9 *pthis, UINT Adapter, D3DDEVTYPE 
 	}
 	else if (result == D3DERR_INVALIDCALL)
 	{
-		if (Settings.FR.Fullscreen && !Settings.FR.AltFullscreen && !InGame())
+		if (!bResTested && Settings.FR.Fullscreen && !Settings.FR.AltFullscreen && !InGame())
 		{
 			qFileLog("ERROR: D3DERR_INVALIDCALL when creating the device. Fullscreen mode is on. Checking whether the requested screen resolution is unsupported.");
-
-			ULONG dwCount = pthis->GetAdapterModeCount(D3DADAPTER_DEFAULT, pParams->BackBufferFormat);
-			D3DDISPLAYMODE DisplayMode;
-			for (ULONG i = 0; i < dwCount; i++)
-			{
-				pthis->EnumAdapterModes(D3DADAPTER_DEFAULT, pParams->BackBufferFormat, i, &DisplayMode);
-				if (DisplayMode.Width == pParams->BackBufferWidth && DisplayMode.Height == pParams->BackBufferHeight
-					&& DisplayMode.Format == pParams->BackBufferFormat)
-				{
-					qFileLog("Test passed: the requested fullscreen mode is supported by the adapter. The issue is in something else. Returning error.");
-					return result;
-				}
-			}
 			
-			qFileLog("End of test: the requested fullscreen mode is NOT supported by the adapter. Switching to windowed mode and notifying the user.");
+			bResTested = 1;
+			HRESULT check = d3d9.CheckFullscreenMode(Adapter, pParams);
+			if (check == D3DERR_NOTAVAILABLE)
+			{
+				qFileLog("End of test: the requested fullscreen mode is NOT supported by the adapter. Switching to windowed mode and notifying the user.");
 
-			WritePrivateProfileInt("FrontendSettings", "Fullscreen", Settings.FR.Fullscreen = false, Config);
-			WritePrivateProfileInt("FrontendSettings", "FullscreenAlternative", Settings.FR.AltFullscreen = false, Config);
-			M_UnsupportedFullscreen(WA.BB.Width, WA.BB.Height, DISP_CHANGE_BADMODE);
-			goto SetWindowedMode;
+				WritePrivateProfileInt("FrontendSettings", "Fullscreen", Settings.FR.Fullscreen = false, Config);
+				WritePrivateProfileInt("FrontendSettings", "FullscreenAlternative", Settings.FR.AltFullscreen = false, Config);
+				SetWindowPos(pParams->hDeviceWindow, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOZORDER);
+				M_UnsupportedFullscreen(WA.BB.Width, WA.BB.Height, DISP_CHANGE_BADMODE);
+				goto SetWindowedMode;
+			}
+			else if (check == D3D_OK)
+				goto LostTest;
 		}
-		else
-			qFileLog("ERROR: wild D3DERR_INVALIDCALL when creating the device. Returning error.");
+		else LostTest:
+		{
+			Sleep(1);
+			goto CreateDevice;
+		}
 	}
 	else
 		fFileLog("FAILURE when creating IDirect3DDevice9: 0x%X! This may lead to the game exiting. Returning error.", result);
