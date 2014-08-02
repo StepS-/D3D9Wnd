@@ -184,7 +184,7 @@ extern D3D9wnd_environment Env;
 
 extern D3D9Info d3d9;
 
-BOOL UpdateWACaption(int SizeX, int SizeY, BOOL TopmostState, LONG MousePinnedState, BOOL ActiveBgState);
+BOOL UpdateWACaption();
 BOOL MinimizeWA();
 BOOL ClipCursorInFrontend();
 BOOL StickW2Wnd();

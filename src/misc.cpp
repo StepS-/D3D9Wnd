@@ -17,16 +17,16 @@ WA_info WA;
 Memory_addresses Offsets;
 D3D9wnd_environment Env;
 
-BOOL UpdateWACaption(int SizeX, int SizeY, BOOL TopmostState, LONG MousePinnedState, BOOL ActiveBgState)
+BOOL UpdateWACaption()
 {
 	if (InGame() && Settings.IG.QuickInfo)
 	{
 		qFileLog("Updating the W:A window caption.");
 		char watext[256];
 
-		sprintf_s(watext, "Worms Armageddon (windowed) | %u x %u | %s | %s | Active bg %s", SizeX, SizeY,
-			TopmostState ? "Topmost" : "No topmost", MousePinnedState >= 0 ? "Unpinned" : "Pinned",
-			ActiveBgState ? "ON" : "OFF");
+		sprintf_s(watext, "Worms Armageddon (windowed) | %u x %u | %s | %s | Active bg %s", WA.BB.Width, WA.BB.Height,
+			Settings.Misc.NoTopmost ? "No topmost" : "Topmost", ShowCursorCount() >= 0 ? "Unpinned" : "Pinned",
+			Settings.IG.Background ? "ON" : "OFF");
 
 		return SetWindowText(WA.Wnd.DX, watext);
 	}
@@ -76,7 +76,7 @@ BOOL ChangeTopmostState()
 
 	fFileLog("Switch to %s triggered via keyboard.", Settings.Misc.NoTopmost ? "no topmost" : "topmost");
 
-	UpdateWACaption(WA.BB.Width, WA.BB.Height, !Settings.Misc.NoTopmost, ShowCursorCount(), Settings.IG.Background);
+	UpdateWACaption();
 
 	return Settings.Misc.NoTopmost;
 }

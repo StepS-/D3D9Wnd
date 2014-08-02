@@ -309,7 +309,7 @@ BOOL __stdcall SetWndParam(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx
 				SetParent(WA.Wnd.W2D, WA.Wnd.DX);
 			}
 
-			UpdateWACaption(WA.BB.Width, WA.BB.Height, !Settings.Misc.NoTopmost, ShowCursorCount(), Settings.IG.Background);
+			UpdateWACaption();
 
 			if (Settings.IG.Stretch)
 			{

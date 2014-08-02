@@ -33,7 +33,7 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wKeyCode, LPARAM lParam)
 
 					qFileLog("KeyboardProc: Switched cursor visibility via Ctrl+G.");
 
-					UpdateWACaption(WA.BB.Width, WA.BB.Height, !Settings.Misc.NoTopmost, ShowCursorCount(), Settings.IG.Background);
+					UpdateWACaption();
 				}
 
 
@@ -58,9 +58,9 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wKeyCode, LPARAM lParam)
 							Settings.IG.Background = 0;
 						}
 
-						fFileLog("KeyboardProc: Toggled Active Background with Ctrl+G to %s.", Settings.IG.Background ? "ON" : "OFF");
+						fFileLog("KeyboardProc: Toggled Active Background with Ctrl+H to %s.", Settings.IG.Background ? "ON" : "OFF");
 
-						UpdateWACaption(WA.BB.Width, WA.BB.Height, !Settings.Misc.NoTopmost, ShowCursorCount(), Settings.IG.Background);
+						UpdateWACaption();
 					}
 					else
 						qFileLog("KeyboardProc: Attempted to toggle active background with Ctrl+H, but not done anything since it's forcibly enabled with DWM Desktop Composition disabled.");
@@ -100,7 +100,7 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wKeyCode, LPARAM lParam)
 								ClientToScreen(WA.Wnd.DX, (POINT*)&RClRect);
 								SetWindowPos(WA.Wnd.DX, HWND_TOP, WRect.left - (RClRect.left - WRect.left), WRect.top - (RClRect.top - WRect.top), 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 								Settings.IG.WindowBorder = 1;
-								UpdateWACaption(WA.BB.Width, WA.BB.Height, !Settings.Misc.NoTopmost, ShowCursorCount(), Settings.IG.Background);
+								UpdateWACaption();
 							}
 						}
 
@@ -215,7 +215,7 @@ LRESULT CALLBACK CallWndProc(int nCode, WPARAM wParam, LPARAM lParam)
 							qFileLog("WindowProc: Regained focus and pinned the cursor back automatically.");
 						}
 
-						UpdateWACaption(WA.BB.Width, WA.BB.Height, !Settings.Misc.NoTopmost, ShowCursorCount(), Settings.IG.Background);
+						UpdateWACaption();
 					}
 					
 					if (pwp->wParam)
@@ -264,7 +264,7 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
 
 					qFileLog("MouseProc: Cursor pinned back to the game through user click.");
 
-					UpdateWACaption(WA.BB.Width, WA.BB.Height, !Settings.Misc.NoTopmost, ShowCursorCount(), Settings.IG.Background);
+					UpdateWACaption();
 				}
 			}
 		}
