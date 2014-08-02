@@ -99,6 +99,26 @@ HRESULT WINAPI D3D9PresentHook(IDirect3DDevice9 *pthis, const RECT *pSourceRect,
 	return D3D9PresentNext(pthis, pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
 }
 
+HRESULT WINAPI D3D9ResetHook(IDirect3DDevice9* pthis, D3DPRESENT_PARAMETERS *pParams)
+{
+	qFileLog("Attempting to reset IDirect3DDevice9: hook engaged.");
+
+	WA.BB.Width = pParams->BackBufferWidth;
+	WA.BB.Height = pParams->BackBufferHeight;
+
+	fFileLog("Expected backbuffer size: %ux%u", WA.BB.Width, WA.BB.Height);
+
+	if (!Settings.FR.Fullscreen || Settings.FR.AltFullscreen || InGame())
+		pParams->Windowed = TRUE;
+
+	HRESULT result = D3D9ResetNext(pthis, pParams);
+	if (SUCCEEDED(result))
+		qFileLog("Device reset successfully!");
+	else
+		fFileLog("Device reset FAILURE! Error: 0x%X", result);
+	return result;
+}
+
 HRESULT WINAPI D3D9CreateDeviceHook(IDirect3D9 *pthis, UINT Adapter, D3DDEVTYPE DeviceType, HWND hFocusWindow, DWORD BehaviorFlags,
 	D3DPRESENT_PARAMETERS *pParams, IDirect3DDevice9 **ppReturnedDeviceInterface)
 {
@@ -119,7 +139,7 @@ HRESULT WINAPI D3D9CreateDeviceHook(IDirect3D9 *pthis, UINT Adapter, D3DDEVTYPE 
 	HRESULT result = D3D9CreateDeviceNext(pthis, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pParams, ppReturnedDeviceInterface);
 	if (SUCCEEDED(result))
 	{
-		qFileLog("Successfully created IDirect3DDevice9. Proceeding to messing around with child hooks...");
+		qFileLog("Successfully created IDirect3DDevice9.");
 		d3d9.RefreshDevice(*ppReturnedDeviceInterface);
 
 		if (!D3D9ReleaseNext)
@@ -132,6 +152,18 @@ HRESULT WINAPI D3D9CreateDeviceHook(IDirect3D9 *pthis, UINT Adapter, D3DDEVTYPE 
 			}
 			else
 				qFileLog("FAILED to hook IUnknown::Release!");
+		}
+
+		if (!D3D9ResetNext)
+		{
+			if (MH_CreateHook(d3d9.device.Reset, D3D9ResetHook, (PVOID*)&D3D9ResetNext) == MH_OK)
+			{
+				qFileLog("Successfully hooked IDirect3DDevice9::Reset.");
+				if (MH_EnableHook(d3d9.device.Reset) != MH_OK)
+					qFileLog("FAILED to enable the IDirect3DDevice9::Reset hook!");
+			}
+			else
+				qFileLog("FAILED to hook IDirect3DDevice9::Reset!");
 		}
 
 		if (WA.Version < QV(3,7,2,17) || (!InGame() && Settings.Misc.FancyStartup && !Settings.FR.Fullscreen && !Settings.FR.AltFullscreen))
