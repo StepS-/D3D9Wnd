@@ -111,7 +111,7 @@ HRESULT WINAPI D3D9ResetHook(IDirect3DDevice9* pthis, D3DPRESENT_PARAMETERS *pPa
 	if (!Settings.FR.Fullscreen || Settings.FR.AltFullscreen || InGame())
 	{
 		pParams->Windowed = TRUE;
-		SetWindowPos(pParams->hDeviceWindow, 0, 0, 0, MaxCap(pParams->BackBufferWidth, Env.Act.ResX), MaxCap(pParams->BackBufferHeight, Env.Act.ResY), SWP_SHOWWINDOW | SWP_NOREDRAW | SWP_NOZORDER | SWP_NOMOVE);
+		SetWindowPos(pParams->hDeviceWindow, 0, 0, 0, MaxCap(WA.BB.Width, Env.Act.ResX), MaxCap(WA.BB.Height, Env.Act.ResY), SWP_SHOWWINDOW | SWP_NOREDRAW | SWP_NOZORDER | SWP_NOMOVE);
 	}
 
 	HRESULT result = D3D9ResetNext(pthis, pParams);
@@ -225,7 +225,7 @@ HRESULT WINAPI D3D9CreateDeviceHook(IDirect3D9 *pthis, UINT Adapter, D3DDEVTYPE 
 			else if (check == D3D_OK)
 				qFileLog("Test passed: the requested fullscreen mode is supported. The issue is in something else. It's possible that the device cannot be created at this time. Returning error.");
 			else
-				qFileLog("Unknown error during CheckFullscreenMode test! Code: 0x%X", check);
+				fFileLog("Unknown error during CheckFullscreenMode test! Code: 0x%X", check);
 		}
 		else
 			qFileLog("ERROR: Wild D3DERR_INVALIDCALL when creating the device. It's possible that the device cannot be created at this time. Returning error.");
