@@ -127,8 +127,6 @@ HRESULT WINAPI D3D9CreateDeviceHook(IDirect3D9 *pthis, UINT Adapter, D3DDEVTYPE 
 {
 	qFileLog("Attempting to create IDirect3DDevice9: hook engaged.");
 
-	BOOL bResTested = 0;
-
 	WA.BB.Width = pParams->BackBufferWidth;
 	WA.BB.Height = pParams->BackBufferHeight;
 
@@ -141,7 +139,6 @@ HRESULT WINAPI D3D9CreateDeviceHook(IDirect3D9 *pthis, UINT Adapter, D3DDEVTYPE 
 		SetWndParam(pParams->hDeviceWindow, 0, 0, 0, pParams->BackBufferWidth, pParams->BackBufferHeight, SWP_SHOWWINDOW | SWP_NOREDRAW);
 	}
 
-	CreateDevice:
 	HRESULT result = D3D9CreateDeviceNext(pthis, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pParams, ppReturnedDeviceInterface);
 	if (SUCCEEDED(result))
 	{
@@ -210,11 +207,10 @@ HRESULT WINAPI D3D9CreateDeviceHook(IDirect3D9 *pthis, UINT Adapter, D3DDEVTYPE 
 	}
 	else if (result == D3DERR_INVALIDCALL)
 	{
-		if (!bResTested && Settings.FR.Fullscreen && !Settings.FR.AltFullscreen && !InGame())
+		if (Settings.FR.Fullscreen && !Settings.FR.AltFullscreen && !InGame())
 		{
 			qFileLog("ERROR: D3DERR_INVALIDCALL when creating the device. Fullscreen mode is on. Checking whether the requested screen resolution is unsupported.");
-			
-			bResTested = 1;
+
 			HRESULT check = d3d9.CheckFullscreenMode(Adapter, pParams);
 			if (check == D3DERR_NOTAVAILABLE)
 			{
@@ -227,13 +223,12 @@ HRESULT WINAPI D3D9CreateDeviceHook(IDirect3D9 *pthis, UINT Adapter, D3DDEVTYPE 
 				goto SetWindowedMode;
 			}
 			else if (check == D3D_OK)
-				goto LostTest;
+				qFileLog("Test passed: the requested fullscreen mode is supported. The issue is in something else. It's possible that the device cannot be created at this time. Returning error.");
+			else
+				qFileLog("Unknown error during CheckFullscreenMode test! Code: 0x%X", check);
 		}
-		else LostTest:
-		{
-			Sleep(1);
-			goto CreateDevice;
-		}
+		else
+			qFileLog("ERROR: Wild D3DERR_INVALIDCALL when creating the device. It's possible that the device cannot be created at this time. Returning error.");
 	}
 	else
 		fFileLog("FAILURE when creating IDirect3DDevice9: 0x%X! This may lead to the game exiting. Returning error.", result);
