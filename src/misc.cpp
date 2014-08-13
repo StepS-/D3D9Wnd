@@ -74,11 +74,31 @@ BOOL ChangeTopmostState()
 	Settings.Misc.NoTopmost = !Settings.Misc.NoTopmost;
 	SetWindowPos(WA.Wnd.DX, HWND(-1 - Settings.Misc.NoTopmost), 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 
-	fFileLog("Switch to %s triggered via keyboard.", Settings.Misc.NoTopmost ? "no topmost" : "topmost");
-
 	UpdateWACaption();
 
 	return Settings.Misc.NoTopmost;
+}
+
+BOOL ToggleActiveBackground(BOOL bEnable)
+{
+	if (bEnable)
+	{
+		SetParent(WA.Wnd.W2D, WA.Wnd.DX);
+		if (!Settings.IG.Stretch && WA.BB.Width < Env.Act.ResX && WA.BB.Height < Env.Act.ResY)
+			SetWindowPos(WA.Wnd.W2D, NULL, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+	}
+	else if (Env.Sys.DwmEnabled)
+	{
+		SetParent(WA.Wnd.W2D, NULL);
+		if (!Settings.IG.Stretch && WA.BB.Width < Env.Act.ResX && WA.BB.Height < Env.Act.ResY)
+			StickW2Wnd();
+	}
+	else
+		return FALSE;
+
+	Settings.IG.Background = bEnable;
+	UpdateWACaption();
+	return TRUE;
 }
 
 BOOL FancyUpdate()

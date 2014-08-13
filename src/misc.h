@@ -191,3 +191,4 @@ BOOL ClipCursorInFrontend();
 BOOL StickW2Wnd();
 BOOL ChangeTopmostState();
 BOOL FancyUpdate();
+BOOL ToggleActiveBackground(BOOL bEnable);

@@ -14,8 +14,9 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wKeyCode, LPARAM lParam)
 		{
 			if (KeyPressed(VK_CONTROL))
 			{
-				if (wKeyCode == 'G') // G - mouse unpinning
+				switch (wKeyCode)
 				{
+				case 'G': // G - mouse unpinning
 					if (ShowCursorCount() < 0)
 					{
 						ShowWindow(WA.Wnd.W2D, SW_HIDE);
@@ -34,40 +35,22 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wKeyCode, LPARAM lParam)
 					qFileLog("KeyboardProc: Switched cursor visibility via Ctrl+G.");
 
 					UpdateWACaption();
-				}
+					break;
 
 
-				else if (wKeyCode == 'T') // T - topmost
+				case 'T': // T - topmost
 					ChangeTopmostState();
+					fFileLog("KeyboardProc: Switch to %s triggered via keyboard.", Settings.Misc.NoTopmost ? "no topmost" : "topmost");
+					break;
 
-				else if (wKeyCode == 'H') // H - active background
-				{
-					if (Env.Sys.DwmEnabled)
-					{
-						if (!Settings.IG.Background)
-						{
-							SetParent(WA.Wnd.W2D, WA.Wnd.DX);
-							SetWindowPos(WA.Wnd.W2D, NULL, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-							Settings.IG.Background = 1;
-						}
-
-						else
-						{
-							SetParent(WA.Wnd.W2D, NULL);
-							if (!Settings.IG.Stretch && WA.BB.Width < Env.Act.ResX && WA.BB.Height < Env.Act.ResY) StickW2Wnd();
-							Settings.IG.Background = 0;
-						}
-
-						fFileLog("KeyboardProc: Toggled Active Background with Ctrl+H to %s.", Settings.IG.Background ? "ON" : "OFF");
-
-						UpdateWACaption();
-					}
+				case 'H': // H - active background
+					if (ToggleActiveBackground(!Settings.IG.Background))
+						fFileLog("KeyboardProc: Toggled Active Background %s with Ctrl+H.", Settings.IG.Background ? "ON" : "OFF");
 					else
 						qFileLog("KeyboardProc: Attempted to toggle active background with Ctrl+H, but not done anything since it's forcibly enabled with DWM Desktop Composition disabled.");
-				}
+					break;
 
-				else if (wKeyCode == 'D') // D - quick window border :)
-				{
+				case 'D': // D - quick window border :)
 					if (!Settings.IG.Stretch || (WA.BB.Width < Env.Act.ResX || WA.BB.Height < Env.Act.ResY))
 					{
 						//TODO: simplify these things
@@ -108,10 +91,9 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wKeyCode, LPARAM lParam)
 					}
 					else
 						qFileLog("KeyboardProc: Attempted to toggle the window border with Ctrl+G, but not done anything since the game's window is too big for it.");
-				}
+					break;
 
-				else if (wKeyCode == 'L') // L - lefttop
-				{
+				case 'L': // L - lefttop
 					if (!Settings.IG.Stretch || (WA.BB.Width < Env.Sys.PrimResX || WA.BB.Height < Env.Sys.PrimResY))
 					{
 						if (!Settings.IG.TopLeftPosition)
@@ -136,6 +118,7 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wKeyCode, LPARAM lParam)
 					}
 					else
 						qFileLog("KeyboardProc: Attempted to toggle the top-left window position with Ctrl+L, but not done anything since the game window covers entire screen.");
+					break;
 				}
 			}
 		}
@@ -192,8 +175,9 @@ LRESULT CALLBACK CallWndProc(int nCode, WPARAM wParam, LPARAM lParam)
 
 		if (pwp->hwnd == WA.Wnd.DX)
 		{
-			if (pwp->message == WM_ACTIVATEAPP)
+			switch (pwp->message)
 			{
+			case  WM_ACTIVATEAPP:
 				if (InGame())
 				{
 					if (Settings.IG.AutoUnpin)
@@ -238,9 +222,27 @@ LRESULT CALLBACK CallWndProc(int nCode, WPARAM wParam, LPARAM lParam)
 						qFileLog("WindowProc: Regained focus in artificial fullscreen frontend and changed the screen resolution back to frontend resolution.");
 					}
 				}
-			}
-			else if (pwp->message == WM_EXITSIZEMOVE)
+				break;
+
+			case WM_EXITSIZEMOVE:
 				if (!Settings.IG.Background && !Settings.IG.Stretch) StickW2Wnd();
+				break;
+
+			case WM_DWMCOMPOSITIONCHANGED:
+				if ((Env.Sys.DwmEnabled = DWMEnabled()) == 0)
+				{
+					if (!Settings.IG.Background)
+					{
+						ToggleActiveBackground(TRUE);
+						qFileLog("WindowProc: DWM composition switched to OFF. Active background has been enabled.");
+					}
+					else
+						qFileLog("WindowProc: DWM composition switched to OFF.");
+				}
+				else
+					qFileLog("WindowProc: DWM composition switched to ON.");
+				break;
+			}
 		}
 	}
 
