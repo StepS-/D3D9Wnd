@@ -276,6 +276,7 @@ BOOL __stdcall SetWndParam(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx
 		if (!InGameHandled)
 		{
 			InGameHandled = true;
+			Settings.Misc.FancyStartup = false;
 
 			if (Settings.IG.WindowBorder && !Settings.IG.Stretch && WA.BB.Width < Env.Act.ResX && WA.BB.Height < Env.Act.ResY)
 			{
