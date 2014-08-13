@@ -208,7 +208,7 @@ void GetMultiMonitorConfig()
 		if (Settings.MM.Monitors >= Env.Sys.Monitors)
 		{
 			Env.Act.ResX = Env.Sys.VirtResX;
-			Env.Act.ResY = Env.Sys.VirtResX;
+			Env.Act.ResY = Env.Sys.VirtResY;
 			Env.Act.VirtX = Env.Sys.VirtX;
 			Env.Act.VirtY = Env.Sys.VirtY;
 			fFileLog("Multi-monitors are enabled and a maximum of %u is being used. Virtual-screen rectangle: %d,%d;%d,%d",
