@@ -5,7 +5,7 @@
 char Config[MAX_PATH];
 
 #ifdef LOGGING
-FILE* LOG_FILE = 0;
+HANDLE LOG_FILE = 0;
 #endif
 
 BYTE eCI = 0;
@@ -98,9 +98,6 @@ BOOL FancyUpdate()
 	}
 	return result;
 }
-
-D3D9Info::D3D9Info() {}
-D3D9Info::~D3D9Info() {}
 
 BOOL D3D9Info::RefreshInterface(IDirect3D9* lpObject)
 {

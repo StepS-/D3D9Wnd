@@ -7,7 +7,7 @@
 #include "tools\tools.h"
 
 #ifdef LOGGING
-extern FILE* LOG_FILE;
+extern HANDLE LOG_FILE;
 #define fFileLog(Format, ...) LogToFileA(LOG_FILE, Format, __VA_ARGS__)
 #define qFileLog(string) LogToFileA(LOG_FILE, "%s", string)
 #else
@@ -42,8 +42,8 @@ enum MMSetupType
 
 class D3D9Info{
 public:
-	D3D9Info();
-	~D3D9Info();
+	D3D9Info() {};
+	~D3D9Info() {};
 
 	BOOL RefreshInterface(IDirect3D9* lpObject);
 	BOOL RefreshDevice(IDirect3DDevice9* lpDevice);

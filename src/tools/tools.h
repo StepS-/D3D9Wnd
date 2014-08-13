@@ -4,6 +4,10 @@
 #include <Windows.h>
 #include <stdio.h>
 
+#ifdef VISTAUP
+#include <dwmapi.h>
+#endif
+
 #pragma comment (lib, "version.lib")
 typedef unsigned long long QWORD;
 typedef QWORD *PQWORD, *LPQWORD;
@@ -132,7 +136,7 @@ BOOL RectCat(LPRECT Dest, LPRECT Source);
 LPCSTR DispChangeErrorStrA(LONG ErrorCode);
 LPCWSTR DispChangeErrorStrW(LONG ErrorCode);
 
-int LogToFileA(FILE* pFile, LPCSTR Format, ...);
+int LogToFileA(HANDLE hFile, LPCSTR Format, ...);
 BOOL CmdOption(LPCSTR lpCmdOption);
 
 typedef class PEInfo

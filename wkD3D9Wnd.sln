@@ -7,16 +7,15 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wkD3D9Wnd", "src\wkD3D9Wnd.
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		D_log|Win32 = D_log|Win32
 		Debug|Win32 = Debug|Win32
 		R_log_static|Win32 = R_log_static|Win32
 		R_log|Win32 = R_log|Win32
 		R_static|Win32 = R_static|Win32
+		R_v7_log|Win32 = R_v7_log|Win32
+		R_v7|Win32 = R_v7|Win32
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F99C20DB-A134-4213-A014-7992822B42B9}.D_log|Win32.ActiveCfg = D_log|Win32
-		{F99C20DB-A134-4213-A014-7992822B42B9}.D_log|Win32.Build.0 = D_log|Win32
 		{F99C20DB-A134-4213-A014-7992822B42B9}.Debug|Win32.ActiveCfg = Debug|Win32
 		{F99C20DB-A134-4213-A014-7992822B42B9}.Debug|Win32.Build.0 = Debug|Win32
 		{F99C20DB-A134-4213-A014-7992822B42B9}.R_log_static|Win32.ActiveCfg = R_log_static|Win32
@@ -25,6 +24,10 @@ Global
 		{F99C20DB-A134-4213-A014-7992822B42B9}.R_log|Win32.Build.0 = R_log|Win32
 		{F99C20DB-A134-4213-A014-7992822B42B9}.R_static|Win32.ActiveCfg = R_static|Win32
 		{F99C20DB-A134-4213-A014-7992822B42B9}.R_static|Win32.Build.0 = R_static|Win32
+		{F99C20DB-A134-4213-A014-7992822B42B9}.R_v7_log|Win32.ActiveCfg = R_v7_log|Win32
+		{F99C20DB-A134-4213-A014-7992822B42B9}.R_v7_log|Win32.Build.0 = R_v7_log|Win32
+		{F99C20DB-A134-4213-A014-7992822B42B9}.R_v7|Win32.ActiveCfg = R_v7|Win32
+		{F99C20DB-A134-4213-A014-7992822B42B9}.R_v7|Win32.Build.0 = R_v7|Win32
 		{F99C20DB-A134-4213-A014-7992822B42B9}.Release|Win32.ActiveCfg = Release|Win32
 		{F99C20DB-A134-4213-A014-7992822B42B9}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection

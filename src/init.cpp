@@ -15,7 +15,7 @@ BOOL InitializeD3D9Wnd()
 		return 1;
 
 #ifdef LOGGING
-	fopen_s(&LOG_FILE, "d3d9wnd.log", "w+");
+	LOG_FILE = CreateFile("d3d9wnd.log", GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 #endif
 
 	qFileLog("DLL_PROCESS_ATTACH: Starting logging.");
@@ -77,22 +77,18 @@ BOOL InitializeD3D9Wnd()
 		return 1;
 	}
 
+	D3D9CREATE D3DCreate9 = 0;
+
+#ifdef VISTAUP
+	d3d9.dll = GetModuleHandle("d3d9.dll");
+	D3DCreate9 = &Direct3DCreate9;
+#else
 	if ((d3d9.dll = LoadLibrary("d3d9.dll")) != 0)
 	{
 		qFileLog("Successfully loaded the d3d9.dll library.");
-
-		D3D9CREATE Direct3DCreate9 = (D3D9CREATE)GetProcAddress(d3d9.dll, "Direct3DCreate9");
-		if (MH_CreateHook(Direct3DCreate9, Direct3DCreate9Hook, (PVOID*)&Direct3DCreate9Next) != MH_OK)
+		if ((D3DCreate9 = (D3D9CREATE)GetProcAddress(d3d9.dll, "Direct3DCreate9")) == 0)
 		{
-			qFileLog("Failed to hook Direct3DCreate9! Suspending...");
-			return 1;
-		}
-
-		qFileLog("Successfully hooked Direct3DCreate9.");
-
-		if (MH_EnableHook(Direct3DCreate9) != MH_OK)
-		{
-			qFileLog("Failed to enable the Direct3DCreate9 hook! Suspending...");
+			qFileLog("Failed to find the Direct3DCreate9 entry point in d3d9.dll. Suspending...");
 			return 1;
 		}
 	}
@@ -100,6 +96,21 @@ BOOL InitializeD3D9Wnd()
 	{
 		qFileLog("Failed to load the d3d9.dll library. This system probably doesn't support D3D9. Suspending...");
 		return 1;
+	}
+#endif
+
+	if (MH_CreateHook(D3DCreate9, Direct3DCreate9Hook, (PVOID*)&Direct3DCreate9Next) != MH_OK)
+	{
+		qFileLog("Failed to hook Direct3DCreate9! Suspending...");
+		return 0;
+	}
+	else
+		qFileLog("Successfully hooked Direct3DCreate9.");
+
+	if (MH_EnableHook(D3DCreate9) != MH_OK)
+	{
+		qFileLog("Failed to enable the Direct3DCreate9 hook! Suspending...");
+		return 0;
 	}
 
 	//MH_CreateHook(&DirectDrawCreate, DirectDrawCreateHook, (PVOID*)&DirectDrawCreateNext);
@@ -468,17 +479,30 @@ BOOL __stdcall InstallHooks()
 		if (Settings.Misc.SoundInBackground && !dsound.dll)
 		{
 			qFileLog("SoundInBackground is enabled: hooking the necessary things.");
-			if ((dsound.dll = LoadLibrary("dsound.dll")) != 0)
-			{
-				qFileLog("Successfully loaded the dsound.dll library.");
-				DSOUNDCREATE DirectSoundCreate = (DSOUNDCREATE)GetProcAddress(dsound.dll, "DirectSoundCreate");
-				if (MH_CreateHook(DirectSoundCreate, DSoundCreateHook, (PVOID*)&DSoundCreateNext) != MH_OK)
+			DSOUNDCREATE DSoundCreate = 0;
+			BOOL n = 0;
+			do{
+#ifdef VISTAUP
+				dsound.dll = GetModuleHandle("dsound.dll");
+				DSoundCreate = &DirectSoundCreate;
+#else
+				if ((dsound.dll = LoadLibrary("dsound.dll")) != 0)
+				{
+					qFileLog("Successfully loaded the dsound.dll library.");
+					if ((DSoundCreate = (DSOUNDCREATE)GetProcAddress(dsound.dll, "DirectSoundCreate")) == 0)
+					{
+						qFileLog("Failed to find the DirectSoundCreate entry point in dsound.dll. Sound hooks will be disabled.");
+						break;
+					}
+				}
+				else
+					qFileLog("Failed to load the dsound.dll library! Sound hooks will be disabled.");
+#endif
+				if (MH_CreateHook(DSoundCreate, DSoundCreateHook, (PVOID*)&DSoundCreateNext) != MH_OK)
 					qFileLog("InstallHooks: FAILED to hook DirectSoundCreate!");
 				else
 					qFileLog("InstallHooks: Successfully hooked DirectSoundCreate.");
-			}
-			else
-				qFileLog("Failed to load the dsound.dll library! Sound hooks will be disabled.");
+			} while (n);
 		}
 
 		if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK)
@@ -505,8 +529,10 @@ BOOL __stdcall UninstallHooks()
 		D3D9ReleaseNext = 0;
 		D3D9PresentNext = 0;
 		D3D9CreateDeviceNext = 0;
+#ifndef VISTAUP
 		if (d3d9.dll) { FreeLibrary(d3d9.dll); d3d9.dll = 0; }
 		if (dsound.dll) { FreeLibrary(dsound.dll); dsound.dll = 0; }
+#endif
 		Hooked = FALSE;
 		qFileLog("UninstallHooks: Successfully disabled all hooks.");
 		return 1;

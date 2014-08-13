@@ -4,46 +4,53 @@
 
 QWORD GetFileVersionQ()
 {
-		char WApath[MAX_PATH];DWORD h;
-		WORD V1,V2,V3,V4;
-		GetModuleFileName(0,WApath,MAX_PATH);
-		DWORD Size=GetFileVersionInfoSize(WApath,&h);
-		if(Size)
+	char WApath[MAX_PATH];DWORD h;
+	WORD V1,V2,V3,V4;
+	GetModuleFileName(0,WApath,MAX_PATH);
+	DWORD Size=GetFileVersionInfoSize(WApath,&h);
+	if(Size)
+	{
+		void* Buf=malloc(Size);
+		GetFileVersionInfo(WApath,h,Size,Buf);
+		VS_FIXEDFILEINFO *Info;DWORD Is;
+		if(VerQueryValue(Buf,"\\",(LPVOID*)&Info,(PUINT)&Is))
 		{
-			void* Buf=malloc(Size);
-			GetFileVersionInfo(WApath,h,Size,Buf);
-			VS_FIXEDFILEINFO *Info;DWORD Is;
-			if(VerQueryValue(Buf,"\\",(LPVOID*)&Info,(PUINT)&Is))
+			if(Info->dwSignature==0xFEEF04BD)
 			{
-				if(Info->dwSignature==0xFEEF04BD)
-				{
-					V1=HIWORD(Info->dwFileVersionMS);
-					V2=LOWORD(Info->dwFileVersionMS);
-					V3=HIWORD(Info->dwFileVersionLS);
-					V4=LOWORD(Info->dwFileVersionLS);
-
+				V1=HIWORD(Info->dwFileVersionMS);
+				V2=LOWORD(Info->dwFileVersionMS);
+				V3=HIWORD(Info->dwFileVersionLS);
+				V4=LOWORD(Info->dwFileVersionLS);
 					return MAKEQWORD(V1, V2, V3, V4);
-				}
 			}
 		}
-		return 0;
+	}
+	return 0;
 }
 
 BOOL DWMEnabled()
 {
 	BOOL result = 0;
+#ifdef VISTAUP
+	DwmIsCompositionEnabled(&result);
+#else
 	if (HMODULE DwmApi = LoadLibrary("dwmapi.dll"))
 	{
 		HRESULT(WINAPI *_DwmIsCompositionEnabled)(BOOL *pfEnabled) = (HRESULT(WINAPI *)(BOOL*))GetProcAddress(DwmApi, "DwmIsCompositionEnabled");
 		if (_DwmIsCompositionEnabled)_DwmIsCompositionEnabled(&result);
 		FreeLibrary(DwmApi);
 	}
+#endif
 	return result;
 }
 
 BOOL EnableDPIAwareness()
 {
 	BOOL result = 0;
+#ifdef VISTAUP
+	if (!IsProcessDPIAware())
+		result = SetProcessDPIAware();
+#else
 	HMODULE hUser32 = LoadLibrary("user32.dll");
 	FARPROC isDPIAware = GetProcAddress(hUser32, "IsProcessDPIAware");
 	if (isDPIAware)
@@ -55,6 +62,7 @@ BOOL EnableDPIAwareness()
 		}
 	}
 	FreeLibrary(hUser32);
+#endif
 	return result;
 }
 
@@ -273,59 +281,65 @@ DefinedCheck:
 
 LSTATUS GetRegistryStringA(HKEY hKey, LPCSTR lpSubKey, LPCSTR lpValueName, LPSTR OutBuf, DWORD BufSize, LPCSTR lpDefault)
 {
-	HKEY hTargetKey;
-	LSTATUS lResult = RegOpenKeyExA(hKey, lpSubKey, 0, KEY_READ, &hTargetKey);
+	LSTATUS lResult = 0;
+	DWORD regsz = REG_SZ;
 
-	if (lResult == ERROR_SUCCESS)
+#ifdef VISTAUP
+	lResult = RegGetValueA(hKey, lpSubKey, lpValueName, RRF_RT_REG_SZ, &regsz, (LPBYTE)OutBuf, &BufSize);
+#else
+	HKEY hTargetKey;
+	if ((lResult = RegOpenKeyExA(hKey, lpSubKey, 0, KEY_READ, &hTargetKey)) == ERROR_SUCCESS)
 	{
-		DWORD regsz = REG_SZ;
 		lResult = RegQueryValueExA(hTargetKey, lpValueName, NULL, &regsz, (LPBYTE)OutBuf, &BufSize);
 		RegCloseKey(hTargetKey);
-
-		if (lResult == ERROR_FILE_NOT_FOUND)
-		{
-			strcpy_s(OutBuf, BufSize, lpDefault);
-			return ERROR_SUCCESS;
-		}
 	}
+#endif
 
-	return lResult;
+	if (lResult != ERROR_SUCCESS)
+		strcpy_s(OutBuf, BufSize, lpDefault);
+
+	return ERROR_SUCCESS;
 }
 
 LSTATUS GetRegistryStringW(HKEY hKey, LPCWSTR lpSubKey, LPCWSTR lpValueName, LPWSTR OutBuf, DWORD BufSize, LPCWSTR lpDefault)
 {
-	HKEY hTargetKey;
-	LSTATUS lResult = RegOpenKeyExW(hKey, lpSubKey, 0, KEY_READ, &hTargetKey);
+	LSTATUS lResult = 0;
+	DWORD regsz = REG_SZ;
 
-	if (lResult == ERROR_SUCCESS)
+#ifdef VISTAUP
+	lResult = RegGetValueW(hKey, lpSubKey, lpValueName, RRF_RT_REG_SZ, &regsz, (LPBYTE)OutBuf, &BufSize);
+#else
+	HKEY hTargetKey;
+	if ((lResult = RegOpenKeyExW(hKey, lpSubKey, 0, KEY_READ, &hTargetKey)) == ERROR_SUCCESS)
 	{
-		DWORD regsz = REG_SZ;
 		lResult = RegQueryValueExW(hTargetKey, lpValueName, NULL, &regsz, (LPBYTE)OutBuf, &BufSize);
 		RegCloseKey(hTargetKey);
-
-		if (lResult == ERROR_FILE_NOT_FOUND)
-		{
-			wcscpy_s(OutBuf, BufSize, lpDefault);
-			return ERROR_SUCCESS;
-		}
 	}
+#endif
 
-	return lResult;
+	if (lResult != ERROR_SUCCESS)
+		wcscpy_s(OutBuf, BufSize, lpDefault);
+
+	return ERROR_SUCCESS;
 }
 
 DWORD GetRegistryDwordA(HKEY hKey, LPCSTR lpSubKey, LPCSTR lpValueName, DWORD dwDefault)
 {
 	DWORD dwResult = dwDefault;
-	HKEY hTargetKey;
-	LSTATUS lResult = RegOpenKeyExA(hKey, lpSubKey, 0, KEY_READ, &hTargetKey);
+	DWORD dwSize = sizeof(DWORD);
+	DWORD regdword = REG_DWORD;
 
-	if (lResult == ERROR_SUCCESS)
+#ifdef VISTAUP
+	RegGetValueA(hKey, lpSubKey, lpValueName, RRF_RT_REG_DWORD, &regdword, (LPBYTE)&dwResult, &dwSize);
+#else
+	LSTATUS lResult = 0;
+	HKEY hTargetKey;
+	if ((lResult = RegOpenKeyExA(hKey, lpSubKey, 0, KEY_READ, &hTargetKey)) == ERROR_SUCCESS)
 	{
-		DWORD regdword = REG_DWORD;
-		DWORD dwSize = sizeof(DWORD);
 		RegQueryValueExA(hTargetKey, lpValueName, NULL, &regdword, (LPBYTE)&dwResult, &dwSize);
 		RegCloseKey(hTargetKey);
 	}
+#endif
 
 	return dwResult;
 }
@@ -333,44 +347,56 @@ DWORD GetRegistryDwordA(HKEY hKey, LPCSTR lpSubKey, LPCSTR lpValueName, DWORD dw
 DWORD GetRegistryDwordW(HKEY hKey, LPCWSTR lpSubKey, LPCWSTR lpValueName, DWORD dwDefault)
 {
 	DWORD dwResult = dwDefault;
-	HKEY hTargetKey;
-	LSTATUS lResult = RegOpenKeyExW(hKey, lpSubKey, 0, KEY_READ, &hTargetKey);
+	DWORD dwSize = sizeof(DWORD);
+	DWORD regdword = REG_DWORD;
 
-	if (lResult == ERROR_SUCCESS)
+#ifdef VISTAUP
+	RegGetValueW(hKey, lpSubKey, lpValueName, RRF_RT_REG_DWORD, &regdword, (LPBYTE)&dwResult, &dwSize);
+#else
+	LSTATUS lResult = 0;
+	HKEY hTargetKey;
+	if ((lResult = RegOpenKeyExW(hKey, lpSubKey, 0, KEY_READ, &hTargetKey)) == ERROR_SUCCESS)
 	{
-		DWORD regdword = REG_DWORD;
-		DWORD dwSize = sizeof(DWORD);
 		RegQueryValueExW(hTargetKey, lpValueName, NULL, &regdword, (LPBYTE)&dwResult, &dwSize);
 		RegCloseKey(hTargetKey);
 	}
+#endif
 
 	return dwResult;
 }
 
 LSTATUS WriteRegistryDwordA(HKEY hKey, LPCSTR lpSubKey, LPCSTR lpValueName, DWORD dwNewValue)
 {
-	HKEY hTargetKey;
-	LSTATUS lResult = RegOpenKeyExA(hKey, lpSubKey, 0, KEY_READ | KEY_SET_VALUE, &hTargetKey);
+	LSTATUS lResult = 0;
 
-	if (lResult == ERROR_SUCCESS)
+#ifdef VISTAUP
+	lResult = RegSetKeyValueA(hKey, lpSubKey, lpValueName, REG_DWORD, (LPCBYTE)&dwNewValue, sizeof(DWORD));
+#else
+	HKEY hTargetKey;
+	if ((lResult = RegOpenKeyExA(hKey, lpSubKey, 0, KEY_READ | KEY_SET_VALUE, &hTargetKey)) == ERROR_SUCCESS)
 	{
 		lResult = RegSetValueExA(hTargetKey, lpValueName, NULL, REG_DWORD, (LPCBYTE)&dwNewValue, sizeof(DWORD));
 		RegCloseKey(hTargetKey);
 	}
+#endif
 
 	return lResult;
 }
 
 LSTATUS WriteRegistryDwordW(HKEY hKey, LPCWSTR lpSubKey, LPCWSTR lpValueName, DWORD dwNewValue)
 {
-	HKEY hTargetKey;
-	LSTATUS lResult = RegOpenKeyExW(hKey, lpSubKey, 0, KEY_READ | KEY_SET_VALUE, &hTargetKey);
+	LSTATUS lResult = 0;
 
-	if (lResult == ERROR_SUCCESS)
+#ifdef VISTAUP
+	lResult = RegSetKeyValueW(hKey, lpSubKey, lpValueName, REG_DWORD, (LPCBYTE)&dwNewValue, sizeof(DWORD));
+#else
+	HKEY hTargetKey;
+	if ((lResult = RegOpenKeyExW(hKey, lpSubKey, 0, KEY_READ | KEY_SET_VALUE, &hTargetKey)) == ERROR_SUCCESS)
 	{
 		lResult = RegSetValueExW(hTargetKey, lpValueName, NULL, REG_DWORD, (LPCBYTE)&dwNewValue, sizeof(DWORD));
 		RegCloseKey(hTargetKey);
 	}
+#endif
 
 	return lResult;
 }
@@ -388,19 +414,21 @@ int Mprintf(UINT uType, LPCSTR lpCaption, LPCSTR Format, ...)
 	return result;
 }
 
-int LogToFileA(FILE* pFile, LPCSTR Format, ...)
+int LogToFileA(HANDLE hFile, LPCSTR Format, ...)
 {
 	int result = 0;
-	if (pFile)
+	if (hFile && hFile != INVALID_HANDLE_VALUE)
 	{
-		char buf[5120];
+		char buf[1900], out[2000];
 		va_list args;
 		va_start(args, Format);
 		if (vsprintf_s(buf, Format, args))
 		{
 			SYSTEMTIME sysTime;
 			GetSystemTime(&sysTime);
-			result = fprintf_s(pFile, "[%02u:%02u:%02u.%03u] %s\n", sysTime.wHour, sysTime.wMinute, sysTime.wSecond, sysTime.wMilliseconds, buf);
+			DWORD dwWChk = 0;
+			if (sprintf_s(out, "[%02u:%02u:%02u.%03u] %s\r\n", sysTime.wHour, sysTime.wMinute, sysTime.wSecond, sysTime.wMilliseconds, buf))
+				result = WriteFile(hFile, out, lstrlenA(out), &dwWChk, NULL);
 		}
 		va_end(args);
 	}
