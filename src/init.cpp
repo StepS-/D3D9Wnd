@@ -496,7 +496,10 @@ BOOL __stdcall InstallHooks()
 					}
 				}
 				else
+				{
 					qFileLog("Failed to load the dsound.dll library! Sound hooks will be disabled.");
+					break;
+				}
 #endif
 				if (MH_CreateHook(DSoundCreate, DSoundCreateHook, (PVOID*)&DSoundCreateNext) != MH_OK)
 					qFileLog("InstallHooks: FAILED to hook DirectSoundCreate!");
