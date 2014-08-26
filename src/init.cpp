@@ -33,8 +33,6 @@ BOOL InitializeD3D9Wnd()
 		qFileLog("Module was disabled via INI file. Suspending...");
 		return 1;
 	}
-	
-	WA.PE = new PEInfo(NULL);
 
 	if (!EnableDPIAwareness())     qFileLog("The game's process doesn't need to be set DPI-aware.");
 	else                           qFileLog("The game's process has been made DPI-aware.");
@@ -122,23 +120,22 @@ BOOL InitializeD3D9Wnd()
 		{
 			if (!WA.Steam)
 			{
-				//	Offsets.d3d = 0x403E43;
-				Offsets.Language = 0x8FF748;
-				Offsets.HardwareCursors = 0x8FF700;
-				Offsets.ResX = 0x8FF6CC;
-				Offsets.ResY = 0x8FF6D0;
-				Offsets.RunInBackground = 0x4CBB85;
-				Offsets.AfxString = 0x5F1CB0;
+				Offsets.Language = WA.PE.Offset(0x4FF748);
+				Offsets.HardwareCursors = WA.PE.Offset(0x4FF700);
+				Offsets.ResX = WA.PE.Offset(0x4FF6CC);
+				Offsets.ResY = WA.PE.Offset(0x4FF6D0);
+				Offsets.RunInBackground = WA.PE.Offset(0x0CBB85);
+				Offsets.AfxString = WA.PE.Offset(0x1F1CB0);
 				qFileLog("Loaded secondary offsets for the CD edition of 3.7.2.1.");
 			}
 			else //Steam
 			{
-				Offsets.Language = 0x8FE740;
-				Offsets.HardwareCursors = 0x8FE6F8;
-				Offsets.ResX = 0x8FE6C4;
-				Offsets.ResY = 0x8FE6C8;
-				Offsets.RunInBackground = 0x4CB075; //xB85
-				Offsets.AfxString = 0x5F0CB8;
+				Offsets.Language = WA.PE.Offset(0x4FE740);
+				Offsets.HardwareCursors = WA.PE.Offset(0x4FE6F8);
+				Offsets.ResX = WA.PE.Offset(0x4FE6C4);
+				Offsets.ResY = WA.PE.Offset(0x4FE6C8);
+				Offsets.RunInBackground = WA.PE.Offset(0x0CB075); //xB85
+				Offsets.AfxString = WA.PE.Offset(0x1F0CB8);
 
 				qFileLog("Loaded secondary offsets offsets for the Steam edition of 3.7.2.1.");
 			}
@@ -147,21 +144,21 @@ BOOL InitializeD3D9Wnd()
 
 		case QV(3,7,0,0):
 		{
-			if (WA.PE->FH->TimeDateStamp != 1355997673)
+			if (WA.PE.FH->TimeDateStamp != 1355997673)
 			{
-				fFileLog("User is running 3.7.0.0r1 (%u). Proceeding to the Light mode.", WA.PE->FH->TimeDateStamp);
+				fFileLog("User is running 3.7.0.0r1 (%u). Proceeding to the Light mode.", WA.PE.FH->TimeDateStamp);
 				Env.Light = true;
 				break;
 			}
 
 			else
 			{
-				Offsets.Language = 0x8FD5E0;
-				Offsets.HardwareCursors = 0x8FD598;
-				Offsets.ResX = 0x8FD564;
-				Offsets.ResY = 0x8FD568;
-				Offsets.RunInBackground = 0x4CC115;
-				Offsets.AfxString = 0x5F0CA8;
+				Offsets.Language = WA.PE.Offset(0x4FD5E0);
+				Offsets.HardwareCursors = WA.PE.Offset(0x4FD598);
+				Offsets.ResX = WA.PE.Offset(0x4FD564);
+				Offsets.ResY = WA.PE.Offset(0x4FD568);
+				Offsets.RunInBackground = WA.PE.Offset(0x0CC115);
+				Offsets.AfxString = WA.PE.Offset(0x1F0CA8);
 
 				qFileLog("Loaded secondary offsets for the CD edition of 3.7.0.0r2.");
 			}
@@ -360,7 +357,7 @@ void WriteRunInBackground()
 	{
 		ULONG RBGSearchResult = FindPatternPrecise((PBYTE)
 			"\x8B\x47\x20\x6A\x00\x68\x20\xF0\x00\x00\x68\x12\x01\x00\x00\x50",
-			16, WA.PE->OPT->ImageBase + WA.PE->OPT->BaseOfCode, WA.PE->OPT->SizeOfCode);
+			16, WA.PE.Offset(WA.PE.OPT->BaseOfCode), WA.PE.OPT->SizeOfCode);
 		if (RBGSearchResult != NULL)
 		{
 			Offsets.RunInBackground = RBGSearchResult + 11;
@@ -388,7 +385,7 @@ void CheckStaticWindowClass()
 		if (Env.Light)
 		{
 			ULONG AFXSearchResult = FindPatternPrecise((PBYTE)"Afx:%p:%x:%p:%p:%p",
-				18, WA.PE->OPT->ImageBase + WA.PE->OPT->BaseOfData, WA.PE->OPT->SizeOfInitializedData);
+				18, WA.PE.Offset(WA.PE.OPT->BaseOfData), WA.PE.OPT->SizeOfInitializedData);
 			if (AFXSearchResult != NULL)
 			{
 				Offsets.AfxString = AFXSearchResult;

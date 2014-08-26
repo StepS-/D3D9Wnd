@@ -185,27 +185,36 @@ ULONG FindPatternPrecise(PBYTE bMask, ULONG dwCount, ULONG dwAddress, ULONG dwLe
 
 PEInfo::PEInfo(HMODULE hModule)
 {
-	hModule = hModule == 0 ? GetModuleHandle(0) : hModule;
+	Reset(hModule);
+}
+
+void PEInfo::Reset(HMODULE hModule)
+{
+	hModule = hModule == 0 ? GetModuleHandleA(0) : hModule;
+	Handle = hModule;
 	DOS = (IMAGE_DOS_HEADER*)hModule;
 	NT = (IMAGE_NT_HEADERS*)((DWORD)DOS + DOS->e_lfanew);
 	FH = (IMAGE_FILE_HEADER*)&NT->FileHeader;
 	OPT = (IMAGE_OPTIONAL_HEADER*)&NT->OptionalHeader;
 }
 
-PEInfo::~PEInfo(){}
+DWORD PEInfo::Offset(DWORD off)
+{
+	return (DWORD)Handle + off;
+}
 
 BOOL PEInfo::PtrInCode(PVOID ptr)
 {
-	if (DWORD(ptr) >= OPT->ImageBase + OPT->BaseOfCode
-		&& DWORD(ptr) < OPT->ImageBase + OPT->BaseOfCode + OPT->SizeOfCode)
+	if (DWORD(ptr) >= Offset(OPT->BaseOfCode) &&
+		DWORD(ptr) < Offset(OPT->BaseOfCode) + OPT->SizeOfCode)
 		return true;
 	return false;
 }
 
 BOOL PEInfo::PtrInData(PVOID ptr)
 {
-	if (DWORD(ptr) >= OPT->ImageBase + OPT->BaseOfData
-		&& DWORD(ptr) < OPT->ImageBase + OPT->BaseOfData + OPT->SizeOfInitializedData + OPT->SizeOfUninitializedData)
+	if (DWORD(ptr) >= Offset(OPT->BaseOfData) &&
+		DWORD(ptr) < Offset(OPT->BaseOfData) + OPT->SizeOfInitializedData + OPT->SizeOfUninitializedData)
 		return true;
 	return false;
 }

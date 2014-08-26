@@ -139,15 +139,17 @@ LPCWSTR DispChangeErrorStrW(LONG ErrorCode);
 int LogToFileA(HANDLE hFile, LPCSTR Format, ...);
 BOOL CmdOption(LPCSTR lpCmdOption);
 
-typedef class PEInfo
+typedef struct PEInfo
 {
-public:
-	PEInfo(HMODULE hModule);
-	~PEInfo();
+	PEInfo(HMODULE hModule = 0);
+	~PEInfo() {};
 
+	void Reset(HMODULE hModule);
+	DWORD Offset(DWORD off);
 	BOOL PtrInCode(PVOID ptr);
 	BOOL PtrInData(PVOID ptr);
-
+	
+	HANDLE Handle;
 	IMAGE_DOS_HEADER* DOS;
 	IMAGE_NT_HEADERS* NT;
 	IMAGE_FILE_HEADER* FH;

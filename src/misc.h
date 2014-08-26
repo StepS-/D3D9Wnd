@@ -40,11 +40,7 @@ enum MMSetupType
 	MULTIMON_TYPE_RECTANGLE,
 };
 
-class D3D9Info{
-public:
-	D3D9Info() {};
-	~D3D9Info() {};
-
+struct D3D9Info{
 	BOOL RefreshInterface(IDirect3D9* lpObject);
 	BOOL RefreshDevice(IDirect3DDevice9* lpDevice);
 	HRESULT CheckFullscreenMode(UINT Adapter, D3DPRESENT_PARAMETERS *pParams);
@@ -128,7 +124,7 @@ struct WA_info{
 			MFC,
 			W2D;
 	} Rect;
-	PPEInfo PE;
+	PEInfo PE;
 };
 
 struct Memory_addresses{
