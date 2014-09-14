@@ -326,7 +326,7 @@ void LoadConfig()
 		WritePrivateProfileInt("InGameSettings", "ActiveBackground", 1, Config);
 	}
 
-	if (!Settings.FR.Fullscreen && (Settings.FR.Centered || Settings.FR.Stretch || Settings.FR.ArbitrarySizing))
+	if (WA.Version < QV(3,7,2,46) && !Settings.FR.Fullscreen && (Settings.FR.Centered || Settings.FR.Stretch || Settings.FR.ArbitrarySizing))
 	{
 		if (!Env.Light)
 		{

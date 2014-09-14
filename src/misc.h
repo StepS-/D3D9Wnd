@@ -121,8 +121,9 @@ struct WA_info{
 	} BB;
 	struct KeptRects{
 		RECT
-			MFC,
-			W2D;
+			DX,
+			W2D,
+			MFC;
 	} Rect;
 	PEInfo PE;
 };
@@ -184,7 +185,7 @@ extern D3D9Info d3d9;
 BOOL UpdateWACaption();
 BOOL MinimizeWA();
 BOOL ClipCursorInFrontend();
-BOOL StickW2Wnd();
 BOOL ChangeTopmostState();
 BOOL FancyUpdate();
+BOOL StickWnd(HWND hWnd);
 BOOL ToggleActiveBackground(BOOL bEnable);

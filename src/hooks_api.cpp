@@ -13,29 +13,27 @@ BOOL(WINAPI *MoveWindowNext)(HWND, int, int, int, int, BOOL);
 HWND WINAPI CreateDialogIndirectParamANew(HINSTANCE hInstance,LPCDLGTEMPLATEA lpTemplate,HWND hWndParent,DLGPROC lpDialogFunc,LPARAM dwInitParam)
 {
 	HWND Wnd = CreateDialogIndirectParamANext(hInstance, lpTemplate, hWndParent, lpDialogFunc, dwInitParam);
-	
-	if (!Settings.FR.Fullscreen || Settings.FR.AltFullscreen)
+
+	if (WA.Version < QV(3,7,2,46) && (!Settings.FR.Fullscreen || Settings.FR.AltFullscreen))
 	{
+		EnableWindow(WA.Wnd.DX, true);
 		SetWindowLong(Wnd, GWL_EXSTYLE, GetWindowLong(Wnd, (GWL_EXSTYLE)) | WS_EX_LAYERED | WS_EX_COMPOSITED);
 		SetLayeredWindowAttributes(Wnd, 0, 1, LWA_ALPHA);
 		//GDI layer workaround: prevent white mess on focus loss and maximization in frontend screens.
 
-		qFileLog("CreateDialogIndirectParam: Applied the transparency layer to the new MFC dialog.");
+		qFileLog("CreateDialogIndirectParam: Applied the transparency layer to the new MFC dialog and enabled the DX window.");
 	}
 
 	if (hWndParent == WA.Wnd.DX)
 	{
 		qFileLog("CreateDialogIndirectParam: A generic frontend MFC dialog screen has been entered.");
 
-		if (!IsWindowEnabled(WA.Wnd.DX))
-			EnableWindow(WA.Wnd.DX, true); //idk
-
 		Env.EasterEgg.FrontendHidden = false;
 		WA.Wnd.MFC = Wnd;
 		GetWindowRect(Wnd, &WA.Rect.MFC);
 
-		if (!Settings.FR.Fullscreen && !Settings.FR.AltFullscreen && !Settings.MM.Enable
-			&& (Settings.FR.Stretch || Settings.FR.ArbitrarySizing || Settings.FR.Centered))
+		if (WA.Version < QV(3,7,2,46) && (!Settings.FR.Fullscreen && !Settings.FR.AltFullscreen && !Settings.MM.Enable
+			&& (Settings.FR.Stretch || Settings.FR.ArbitrarySizing || Settings.FR.Centered)))
 		{
 			ClipCursorInFrontend();
 		}
@@ -122,6 +120,7 @@ BOOL WINAPI MoveWindowNew(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL
 			{
 				if (Settings.FR.ArbitrarySizing)
 				{
+					ClipCursorInFrontend();
 					X = MinCap((Env.Sys.PrimResX / 2) - (Settings.FR.Xsize / 2), 0);
 					Y = MinCap((Env.Sys.PrimResY / 2) - (Settings.FR.Ysize / 2), 0);
 					nWidth = MaxCap(Settings.FR.Xsize, Env.Sys.PrimResX);
@@ -132,12 +131,27 @@ BOOL WINAPI MoveWindowNew(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL
 
 				else
 				{
-					ClipCursorInFrontend();
-					X = MinCap((Env.Sys.PrimResX / 2) - (WA.BB.Width / 2), 0);
-					Y = MinCap((Env.Sys.PrimResY / 2) - (WA.BB.Height / 2), 0);
+					if (WA.Version < QV(3,7,2,46))
+					{
+						ClipCursorInFrontend();
+						X = MinCap((Env.Sys.PrimResX / 2) - (WA.BB.Width / 2), 0);
+						Y = MinCap((Env.Sys.PrimResY / 2) - (WA.BB.Height / 2), 0);
+					}
+					else
+					{
+						RECT ClRect = { X, Y, nWidth, nHeight };
+						DWORD Style = GetWindowLong(hWnd, GWL_STYLE) | WS_CAPTION;
+						AdjustWindowRect(&ClRect, Style, 0);
+						nWidth = ClRect.right - ClRect.left;
+						nHeight = ClRect.bottom - ClRect.top;
+						SetWindowLong(hWnd, GWL_STYLE, Style &~WS_MAXIMIZEBOX);
+						X = MinCap((Env.Sys.PrimResX / 2) - (WA.BB.Width / 2), 0);
+						Y = MinCap((Env.Sys.PrimResY / 2) - (WA.BB.Height / 2), 0);
+					}
 
 					qFileLog("MoveWindow: Calculated the position of CenteredFrontend.");
 				}
+
 			}
 
 			else if (Settings.FR.ArbitrarySizing)

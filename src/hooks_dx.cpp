@@ -294,12 +294,16 @@ BOOL __stdcall SetWndParam(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx
 				else
 				{
 					Settings.IG.WindowBorder = 0;
+					SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) &~WS_CAPTION); //If the new frontend has a border
 					qFileLog("SetWndParam: Window border was enabled, but it's too big for the requested window size/mode. It has now been disabled.");
 				}
 					
 			}
 			else
+			{
+				SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) &~WS_CAPTION); //If the new frontend has a border
 				qFileLog("SetWndParam: Window border is either disabled or is too big for the requested window size/mode.");
+			}
 
 			qFileLog("SetWndParam: Entering in-game and adjusting everything that we need.");
 
@@ -392,13 +396,15 @@ BOOL __stdcall SetWndParam(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx
 		if (InGameHandled)
 		{
 			qFileLog("SetWndParam: This is a return to frontend after the match.");
-			if (Settings.IG.WindowBorder)
+			if (Settings.IG.WindowBorder && !(WA.Version >= QV(3,7,2,46) && Settings.FR.Centered))
 			{
 				qFileLog("SetWndParam: trying to remove the window border manually before it's done in an unsafe automatic way. [NEW!]");
 				SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) &~WS_CAPTION &~WS_MAXIMIZEBOX);
 			}
 			InGameHandled = false;
 		}
+		else
+			uFlags |= SWP_NOMOVE | SWP_NOSIZE;
 	}
 
 	qFileLog("SetWndParam: Calling SetWindowPos.");

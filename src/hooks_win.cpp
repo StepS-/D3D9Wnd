@@ -99,7 +99,7 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wKeyCode, LPARAM lParam)
 						if (!Settings.IG.TopLeftPosition)
 						{
 							SetWindowPos(WA.Wnd.DX, NULL, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-							if (!Settings.IG.Background) StickW2Wnd();
+							if (!Settings.IG.Background) StickWnd(WA.Wnd.W2D);
 							Settings.IG.TopLeftPosition = true;
 						}
 
@@ -110,7 +110,7 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wKeyCode, LPARAM lParam)
 							int newx = (Env.Act.ResX / 2) - (WArect.right - WArect.left) / 2;
 							int newy = (Env.Act.ResY / 2) - (WArect.bottom - WArect.top) / 2;
 							SetWindowPos(WA.Wnd.DX, NULL, newx, newy, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-							if (!Settings.IG.Background) StickW2Wnd();
+							if (!Settings.IG.Background) StickWnd(WA.Wnd.W2D);
 							Settings.IG.TopLeftPosition = false;
 						}
 
@@ -135,18 +135,19 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wKeyCode, LPARAM lParam)
 				
 				else if (Env.EasterEgg.InControl)
 				{
-					RECT WndRect;
-					GetWindowRect(WA.Wnd.MFC, &WndRect);
-					int xpos = WndRect.left, ypos = WndRect.top;
-
 					if (wKeyCode >= '1' && wKeyCode <= '9')
 						Env.EasterEgg.Multiplier = wKeyCode - 0x30;
 
 					else if (wKeyCode >= VK_LEFT && wKeyCode <= VK_DOWN)
-						SetWindowPos(WA.Wnd.MFC, NULL,
-						xpos + Env.EasterEgg.Multiplier * (wKeyCode % 2)       * (-VK_UP   + wKeyCode),
-						ypos + Env.EasterEgg.Multiplier * ((wKeyCode + 1) % 2) * (-VK_RIGHT + wKeyCode),
-						0, 0, SWP_NOSIZE | SWP_NOZORDER);
+					{
+						GetWindowRect(WA.Wnd.DX, &WA.Rect.DX);
+						GetWindowRect(WA.Wnd.MFC, &WA.Rect.MFC);
+						int xx = Env.EasterEgg.Multiplier * (wKeyCode % 2)       * (-VK_UP + wKeyCode);
+						int yy = Env.EasterEgg.Multiplier * ((wKeyCode + 1) % 2) * (-VK_RIGHT + wKeyCode);
+						SetWindowPos(WA.Wnd.DX, NULL, xx + WA.Rect.DX.left, yy + WA.Rect.DX.top, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+					    if (GetAncestor(WA.Wnd.MFC, GA_PARENT) != WA.Wnd.DX)
+							SetWindowPos(WA.Wnd.MFC, NULL, xx + WA.Rect.MFC.left, yy + WA.Rect.MFC.top, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+					}
 
 					else if (wKeyCode == 'Z')
 					{
@@ -225,7 +226,7 @@ LRESULT CALLBACK CallWndProc(int nCode, WPARAM wParam, LPARAM lParam)
 				break;
 
 			case WM_EXITSIZEMOVE:
-				if (!Settings.IG.Background && !Settings.IG.Stretch) StickW2Wnd();
+				if (!Settings.IG.Background && !Settings.IG.Stretch) StickWnd(WA.Wnd.W2D);
 				break;
 
 			case WM_DWMCOMPOSITIONCHANGED:

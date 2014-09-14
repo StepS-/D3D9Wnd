@@ -59,14 +59,14 @@ BOOL ClipCursorInFrontend()
 	return false;
 }
 
-BOOL StickW2Wnd()
+BOOL StickWnd(HWND hWnd)
 {
 	RECT WArect;
 	GetClientRect(WA.Wnd.DX, &WArect);
 	ClientToScreen(WA.Wnd.DX, (POINT*)&WArect);
 
-	qFileLog("Worms2D window has follolowed the game window.");
-	return SetWindowPos(WA.Wnd.W2D, NULL, WArect.left, WArect.top, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+	qFileLog("Some window has followed the game window.");
+	return SetWindowPos(hWnd, NULL, WArect.left, WArect.top, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 }
 
 BOOL ChangeTopmostState()
@@ -91,7 +91,7 @@ BOOL ToggleActiveBackground(BOOL bEnable)
 	{
 		SetParent(WA.Wnd.W2D, NULL);
 		if (!Settings.IG.Stretch && WA.BB.Width < Env.Act.ResX && WA.BB.Height < Env.Act.ResY)
-			StickW2Wnd();
+			StickWnd(WA.Wnd.W2D);
 	}
 	else
 		return FALSE;
