@@ -81,17 +81,20 @@ BOOL ChangeTopmostState()
 
 BOOL ToggleActiveBackground(BOOL bEnable)
 {
-	if (bEnable)
+	if (Env.Sys.DwmEnabled)
 	{
-		SetParent(WA.Wnd.W2D, WA.Wnd.DX);
-		if (!Settings.IG.Stretch && WA.BB.Width < Env.Act.ResX && WA.BB.Height < Env.Act.ResY)
-			SetWindowPos(WA.Wnd.W2D, NULL, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-	}
-	else if (Env.Sys.DwmEnabled)
-	{
-		SetParent(WA.Wnd.W2D, NULL);
-		if (!Settings.IG.Stretch && WA.BB.Width < Env.Act.ResX && WA.BB.Height < Env.Act.ResY)
-			StickWnd(WA.Wnd.W2D);
+		if (bEnable)
+		{
+			SetParent(WA.Wnd.W2D, WA.Wnd.DX);
+			if (!Settings.IG.Stretch && WA.BB.Width < Env.Act.ResX && WA.BB.Height < Env.Act.ResY)
+				SetWindowPos(WA.Wnd.W2D, NULL, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+		}
+		else
+		{
+			SetParent(WA.Wnd.W2D, NULL);
+			if (!Settings.IG.Stretch && WA.BB.Width < Env.Act.ResX && WA.BB.Height < Env.Act.ResY)
+				StickWnd(WA.Wnd.W2D);
+		}
 	}
 	else
 		return FALSE;
