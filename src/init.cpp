@@ -62,7 +62,7 @@ BOOL InitializeD3D9Wnd()
 	}
 
 	Env.Sys.BPP = GetDeviceCaps(GetDC(0), BITSPIXEL);
-	if (Env.Sys.BPP < 32)
+	if (WA.Version < QV(3,7,2,46) && Env.Sys.BPP < 32)
 	{
 		fFileLog("Too low colour depth in the system: %u. Notifying the user and suspending...", Env.Sys.BPP);
 		M_LowBPP(Env.Sys.BPP);
