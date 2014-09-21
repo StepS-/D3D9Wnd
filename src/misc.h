@@ -116,8 +116,11 @@ struct WA_info{
 	} Wnd;
 	struct BackBuffer{
 		INT32
-			Width = 640,
-			Height = 480;
+			Width,
+			Height;
+		BackBuffer() :
+			Width(640),
+			Height(480) {}
 	} BB;
 	struct KeptRects{
 		RECT
@@ -168,7 +171,9 @@ struct D3D9wnd_environment{
 			FrontendHidden,
 			InControl;
 		INT32
-			Multiplier = 1;
+			Multiplier;
+		EasterEggData() :
+			Multiplier(1) {}
 	} EasterEgg;
 };
 
