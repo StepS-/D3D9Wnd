@@ -299,7 +299,6 @@ void LoadConfig()
 	Settings.FR.AltFullscreen = GetPrivateProfileInt("FrontendSettings", "FullscreenAlternative", 0, Config);
 	Settings.FR.Stretch = GetPrivateProfileInt("FrontendSettings", "Stretch", 0, Config);
 	Settings.FR.Centered = GetPrivateProfileInt("FrontendSettings", "Centered", 0, Config);
-	Settings.FR.Background = GetPrivateProfileInt("FrontendSettings", "RunInBackground", 1, Config);
 	Settings.FR.ArbitrarySizing = GetPrivateProfileInt("FrontendSettings", "EnableCustomSize", 0, Config);
 	Settings.FR.Xsize = GetPrivateProfileInt("FrontendSettings", "Xsize", 640, Config);
 	Settings.FR.Ysize = GetPrivateProfileInt("FrontendSettings", "Ysize", 480, Config);
@@ -307,13 +306,24 @@ void LoadConfig()
 	Settings.IG.WindowBorder = GetPrivateProfileInt("InGameSettings", "WindowBorder", 0, Config);
 	Settings.IG.Stretch = GetPrivateProfileInt("InGameSettings", "Stretch", 0, Config);
 	Settings.IG.QuickInfo = GetPrivateProfileInt("InGameSettings", "QuickInfo", 1, Config);
-	Settings.IG.Background = GetPrivateProfileInt("InGameSettings", "ActiveBackground", 0, Config);
 	Settings.IG.TopLeftPosition = GetPrivateProfileInt("InGameSettings", "TopLeftPosition", 0, Config);
-	Settings.IG.AutoUnpin = GetPrivateProfileInt("InGameSettings", "AutoUnpin", 1, Config);
 
 	Settings.Misc.SoundInBackground = GetPrivateProfileInt("Misc", "SoundInBackground", 0, Config);
 	Settings.Misc.NoTopmost = GetPrivateProfileInt("Misc", "NoTopmost", 1, Config);
 	Settings.Misc.FancyStartup = GetPrivateProfileInt("Misc", "FancyStartup", 0, Config);
+
+	if (WA.Version < QV(3,7,2,47))
+	{
+		Settings.FR.Background = GetPrivateProfileInt("FrontendSettings", "RunInBackground", 1, Config);
+		Settings.IG.Background = GetPrivateProfileInt("InGameSettings", "ActiveBackground", 1, Config);
+		Settings.IG.AutoUnpin = GetPrivateProfileInt("InGameSettings", "AutoUnpin", 1, Config);
+	}
+	else
+	{
+		Settings.FR.Background = 0;
+		Settings.IG.Background = 1;
+		Settings.IG.AutoUnpin = 0;
+	}
 
 	GetMultiMonitorConfig();
 
