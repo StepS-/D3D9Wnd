@@ -109,10 +109,9 @@ HRESULT WINAPI D3D9ResetHook(IDirect3DDevice9* pthis, D3DPRESENT_PARAMETERS *pPa
 	fFileLog("Expected backbuffer size: %ux%u", WA.BB.Width, WA.BB.Height);
 
 	if (!Settings.FR.Fullscreen || Settings.FR.AltFullscreen || InGame())
-	{
 		pParams->Windowed = TRUE;
-		SetWndParam(pParams->hDeviceWindow, 0, 0, 0, pParams->BackBufferWidth, pParams->BackBufferHeight, SWP_SHOWWINDOW | SWP_NOREDRAW);
-	}
+
+	SetWndParam(pParams->hDeviceWindow, 0, 0, 0, pParams->BackBufferWidth, pParams->BackBufferHeight, SWP_SHOWWINDOW | SWP_NOREDRAW);
 
 	HRESULT result = D3D9ResetNext(pthis, pParams);
 	if (SUCCEEDED(result))
@@ -134,10 +133,9 @@ HRESULT WINAPI D3D9CreateDeviceHook(IDirect3D9 *pthis, UINT Adapter, D3DDEVTYPE 
 
 	SetWindowedMode:
 	if (!Settings.FR.Fullscreen || Settings.FR.AltFullscreen || InGame())
-	{
 		pParams->Windowed = TRUE;
-		SetWndParam(pParams->hDeviceWindow, 0, 0, 0, pParams->BackBufferWidth, pParams->BackBufferHeight, SWP_SHOWWINDOW | SWP_NOREDRAW);
-	}
+
+	SetWndParam(pParams->hDeviceWindow, 0, 0, 0, pParams->BackBufferWidth, pParams->BackBufferHeight, SWP_SHOWWINDOW | SWP_NOREDRAW);
 
 	HRESULT result = D3D9CreateDeviceNext(pthis, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pParams, ppReturnedDeviceInterface);
 	if (SUCCEEDED(result))
@@ -264,11 +262,6 @@ BOOL __stdcall SetWndParam(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx
 
 	WA.Wnd.DX = hWnd;
 
-	if (Settings.Misc.NoTopmost) hWndInsertAfter = HWND_NOTOPMOST;
-	else hWndInsertAfter = HWND_TOPMOST;
-
-	fFileLog("SetWndParam: Window will be set as %s.", Settings.Misc.NoTopmost ? "NOTOPMOST" : "TOPMOST");
-
 	if (InGame())
 	{
 		qFileLog("SetWndParam: Preparing to handle in-game.");
@@ -379,6 +372,24 @@ BOOL __stdcall SetWndParam(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx
 			if (Settings.Misc.FancyStartup && !Settings.FR.AltFullscreen && !Settings.FR.Fullscreen)
 				FancyUpdate();
 
+			if (InGameHandled)
+			{
+				qFileLog("SetWndParam: This is a return to frontend after the match.");
+				if (IsWindow(WA.Wnd.MFC) && !IsNullRect(&WA.Rect.MFC))
+				{
+					SetWindowPos(WA.Wnd.MFC, NULL, WA.Rect.MFC.left, WA.Rect.MFC.top, WA.Rect.MFC.right - WA.Rect.MFC.left, WA.Rect.MFC.bottom - WA.Rect.MFC.top, SWP_NOMOVE | SWP_NOZORDER);
+					ShowWindow(WA.Wnd.MFC, SW_SHOW);
+					qFileLog("SetWndParam: Restored the last MFC overlay to its initial size and display.");
+				}
+
+				if (Settings.IG.WindowBorder && !(WA.Version >= QV(3, 7, 2, 46) && Settings.FR.Centered))
+				{
+					qFileLog("SetWndParam: trying to remove the window border manually before it's done in an unsafe automatic way. [test]");
+					SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) &~WS_CAPTION &~WS_MAXIMIZEBOX);
+				}
+				InGameHandled = false;
+			}
+
 			if (Settings.FR.AltFullscreen)
 			{
 				qFileLog("SetWndParam: User is running artificial fullscreen. Preparing to change resolution via ChangeDisplaySettings.");
@@ -399,95 +410,78 @@ BOOL __stdcall SetWndParam(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx
 				{
 					SetWindowText(WA.Wnd.DX, "Worms Armageddon");
 					fFileLog("SetWndParam: Successfully set the primary monitor's resolution to %ux%u for frontend in artificial fullscreen mode. Calling SetWindowPos.", WA.BB.Width, WA.BB.Height);
-					return SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
 				}
 			}
-			else if (Settings.FR.Fullscreen) //in fact this one is never satisfied because we prevent SetWndParam from being called in this situation
+			else if (Settings.FR.Fullscreen)
 			{
 				SetWindowText(WA.Wnd.DX, "Worms Armageddon");
 
-				qFileLog("SetWndParam: Calling SetWindowPos. We are in fullscreen frontend mode: no further adjustments required.");
-				return SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
+				qFileLog("SetWndParam: Returning. We are in fullscreen frontend mode: no further adjustments required.");
+				return TRUE;
 			}
 			else
+			{
 				SetWindowText(WA.Wnd.DX, "Worms Armageddon (windowed)");
 
-			if (InGameHandled)
-			{
-				qFileLog("SetWndParam: This is a return to frontend after the match.");
-				if (IsWindow(WA.Wnd.MFC) && !IsNullRect(&WA.Rect.MFC))
+				if (Settings.FR.Stretch)
 				{
-					SetWindowPos(WA.Wnd.MFC, NULL, WA.Rect.MFC.left, WA.Rect.MFC.top, WA.Rect.MFC.right - WA.Rect.MFC.left, WA.Rect.MFC.bottom - WA.Rect.MFC.top, SWP_NOMOVE | SWP_NOZORDER);
-					ShowWindow(WA.Wnd.MFC, SW_SHOW);
-					qFileLog("SetWndParam: Restored the last MFC overlay to its initial size and display.");
+					if (!Settings.MM.Enable)
+						ClipCursorInFrontend();
+
+					X = 0;
+					Y = 0;
+					cx = Env.Sys.PrimResX;
+					cy = Env.Sys.PrimResY;
+
+					qFileLog("SetWndParam: Calling next hook. Stretch mode.");
 				}
 
-				if (Settings.IG.WindowBorder && !(WA.Version >= QV(3,7,2,46) && Settings.FR.Centered))
+				else if (Settings.FR.Centered)
 				{
-					qFileLog("SetWndParam: trying to remove the window border manually before it's done in an unsafe automatic way. [test]");
-					SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) &~WS_CAPTION &~WS_MAXIMIZEBOX);
+					if (Settings.FR.ArbitrarySizing)
+					{
+						ClipCursorInFrontend();
+						X = MinCap((Env.Sys.PrimResX / 2) - (Settings.FR.Xsize / 2), 0);
+						Y = MinCap((Env.Sys.PrimResY / 2) - (Settings.FR.Ysize / 2), 0);
+						cx = MaxCap(Settings.FR.Xsize, Env.Sys.PrimResX);
+						cy = MaxCap(Settings.FR.Ysize, Env.Sys.PrimResY);
+
+						qFileLog("SetWndParam: Calculated the position of CenteredFrontend with CustomSize enabled.");
+					}
+
+					else
+					{
+						if (WA.Version < QV(3, 7, 2, 46))
+						{
+							ClipCursorInFrontend();
+							X = MinCap((Env.Sys.PrimResX / 2) - (WA.BB.Width / 2), 0);
+							Y = MinCap((Env.Sys.PrimResY / 2) - (WA.BB.Height / 2), 0);
+						}
+						else
+						{
+							RECT ClRect = { X, Y, cx, cy };
+							DWORD Style = GetWindowLong(hWnd, GWL_STYLE) | WS_CAPTION;
+							AdjustWindowRect(&ClRect, Style, 0);
+							cx = ClRect.right - ClRect.left;
+							cy = ClRect.bottom - ClRect.top;
+							SetWindowLong(hWnd, GWL_STYLE, Style &~WS_MAXIMIZEBOX);
+							X = MinCap((Env.Sys.PrimResX / 2) - (WA.BB.Width / 2), 0);
+							Y = MinCap((Env.Sys.PrimResY / 2) - (WA.BB.Height / 2), 0);
+						}
+
+						qFileLog("SetWndParam: Calculated the position of CenteredFrontend.");
+					}
+
 				}
-				InGameHandled = false;
-			}
 
-			if (Settings.FR.Stretch)
-			{
-				if (!Settings.MM.Enable)
-					ClipCursorInFrontend();
-
-				X = 0;
-				Y = 0;
-				cx = Env.Sys.PrimResX;
-				cy = Env.Sys.PrimResY;
-
-				qFileLog("SetWndParam: Calling next hook. Stretch mode.");
-			}
-
-			else if (Settings.FR.Centered)
-			{
-				if (Settings.FR.ArbitrarySizing)
+				else if (Settings.FR.ArbitrarySizing)
 				{
 					ClipCursorInFrontend();
-					X = MinCap((Env.Sys.PrimResX / 2) - (Settings.FR.Xsize / 2), 0);
-					Y = MinCap((Env.Sys.PrimResY / 2) - (Settings.FR.Ysize / 2), 0);
 					cx = MaxCap(Settings.FR.Xsize, Env.Sys.PrimResX);
 					cy = MaxCap(Settings.FR.Ysize, Env.Sys.PrimResY);
 
-					qFileLog("SetWndParam: Calculated the position of CenteredFrontend with CustomSize enabled.");
+					qFileLog("SetWndParam: Calling next hook. Calculated the position with CustomSize enabled.");
 				}
-
-				else
-				{
-					if (WA.Version < QV(3,7,2,46))
-					{
-						ClipCursorInFrontend();
-						X = MinCap((Env.Sys.PrimResX / 2) - (WA.BB.Width / 2), 0);
-						Y = MinCap((Env.Sys.PrimResY / 2) - (WA.BB.Height / 2), 0);
-					}
-					else
-					{
-						RECT ClRect = { X, Y, cx, cy };
-						DWORD Style = GetWindowLong(hWnd, GWL_STYLE) | WS_CAPTION;
-						AdjustWindowRect(&ClRect, Style, 0);
-						cx = ClRect.right - ClRect.left;
-						cy = ClRect.bottom - ClRect.top;
-						SetWindowLong(hWnd, GWL_STYLE, Style &~WS_MAXIMIZEBOX);
-						X = MinCap((Env.Sys.PrimResX / 2) - (WA.BB.Width / 2), 0);
-						Y = MinCap((Env.Sys.PrimResY / 2) - (WA.BB.Height / 2), 0);
-					}
-
-					qFileLog("SetWndParam: Calculated the position of CenteredFrontend.");
-				}
-
-			}
-
-			else if (Settings.FR.ArbitrarySizing)
-			{
-				ClipCursorInFrontend();
-				cx = MaxCap(Settings.FR.Xsize, Env.Sys.PrimResX);
-				cy = MaxCap(Settings.FR.Ysize, Env.Sys.PrimResY);
-
-				qFileLog("SetWndParam: Calling next hook. Calculated the position with CustomSize enabled.");
 			}
 		}
 		else
@@ -496,6 +490,11 @@ BOOL __stdcall SetWndParam(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx
 			qFileLog("SetWndParam: Frontend already adjusted; ignoring.");
 		}
 	}
+
+	if (Settings.Misc.NoTopmost) hWndInsertAfter = HWND_NOTOPMOST;
+	else hWndInsertAfter = HWND_TOPMOST;
+
+	fFileLog("SetWndParam: Window will be set as %s.", Settings.Misc.NoTopmost ? "NOTOPMOST" : "TOPMOST");
 
 	qFileLog("SetWndParam: Calling SetWindowPos.");
 	return SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
