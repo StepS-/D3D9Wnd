@@ -44,10 +44,13 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wKeyCode, LPARAM lParam)
 					break;
 
 				case 'H': // H - active background
-					if (ToggleActiveBackground(!Settings.IG.Background))
-						fFileLog("KeyboardProc: Toggled Active Background %s with Ctrl+H.", Settings.IG.Background ? "ON" : "OFF");
-					else
-						qFileLog("KeyboardProc: Attempted to toggle active background with Ctrl+H, but not done anything since it's forcibly enabled with DWM Desktop Composition disabled.");
+					if (WA.Version < QV(3,7,2,47))
+					{
+						if (ToggleActiveBackground(!Settings.IG.Background))
+							fFileLog("KeyboardProc: Toggled Active Background %s with Ctrl+H.", Settings.IG.Background ? "ON" : "OFF");
+						else
+							qFileLog("KeyboardProc: Attempted to toggle active background with Ctrl+H, but not done anything since it's forcibly enabled with DWM Desktop Composition disabled.");
+					}
 					break;
 
 				case 'D': // D - quick window border :)
