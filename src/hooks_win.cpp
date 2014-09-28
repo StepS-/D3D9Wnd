@@ -209,8 +209,7 @@ LRESULT CALLBACK CallWndProc(int nCode, WPARAM wParam, LPARAM lParam)
 					if (pwp->wParam)
 					{
 						SendMessage(WA.Wnd.W2D, WM_KEYUP, VK_MENU, 0); //Workaround: send WM_KEYUP to Alt.
-						SetCursorPos(WA.BB.Width / 2, WA.BB.Height / 2);
-						//TODO: needs rethinking of a proper way to do it. This SetCursorPos thing results in a cursor jump when clicking caption in bordered window mode.
+					//	SetCursorPos(WA.BB.Width / 2, WA.BB.Height / 2); //Seems to be fixed as of 3.7.2.47, so this is unneeded and causes a focus loss after unminimizing for the first time
 					}
 				}
 				else if (Settings.FR.AltFullscreen)
