@@ -431,12 +431,10 @@ BOOL __stdcall InstallHooks()
 		if (hkb)                           qFileLog("InstallHooks: Successfully installed a WH_KEYBOARD Windows hook.");
 		else                               qFileLog("InstallHooks: FAILED to install a WH_KEYBOARD Windows hook!");
 
-		if (Settings.IG.AutoUnpin || Settings.FR.AltFullscreen)
-		{
-			hkb2 = SetWindowsHookEx(WH_CALLWNDPROC, CallWndProc, 0, GetCurrentThreadId());
-			if (hkb2)                      qFileLog("InstallHooks: Successfully installed a WH_CALLWNDPROC Windows hook.");
-			else                           qFileLog("InstallHooks: FAILED to install a WH_CALLWNDPROC Windows hook!");
-		}
+		hkb2 = SetWindowsHookEx(WH_CALLWNDPROC, CallWndProc, 0, GetCurrentThreadId());
+		if (hkb2)                      qFileLog("InstallHooks: Successfully installed a WH_CALLWNDPROC Windows hook.");
+		else                           qFileLog("InstallHooks: FAILED to install a WH_CALLWNDPROC Windows hook!");
+
 		if (Settings.IG.AutoUnpin)
 		{
 			hkb3 = SetWindowsHookEx(WH_MOUSE, MouseProc, 0, GetCurrentThreadId());
