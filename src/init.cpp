@@ -34,151 +34,158 @@ BOOL InitializeD3D9Wnd()
 		return 1;
 	}
 
-	if (!EnableDPIAwareness())     qFileLog("The game's process doesn't need to be set DPI-aware.");
-	else                           qFileLog("The game's process has been made DPI-aware.");
-
-	if ((Env.Sys.DwmEnabled = DWMEnabled()) != 0) qFileLog("DWM desktop composition is enabled.");
-	else                           qFileLog("DWM desktop composition is disabled.");
-
-	if (LoadLibrary("wkWndMode.dll"))
-	{
-		qFileLog("User has wkWndMode.dll in his game's directory. Suspending...");
-		M_WndmodeDetected();
-		return 1;
-	}
-
-	WA.Version = GetWAVersion(); fFileLog("Detected the game version: %u.%u.%u.%u",
+	WA.Version = GetWAVersion();
+	fFileLog("Detected the game version: %u.%u.%u.%u",
 		PWORD(&WA.Version)[2], PWORD(&WA.Version)[3], PWORD(&WA.Version)[0], PWORD(&WA.Version)[1]);
 
-	if ((WA.Steam = SteamCheck()) != 0) qFileLog("User is running the Steam edition of the game.");
-	else								qFileLog("User is running the CD edition of the game.");
-		
-	if (WA.Version < QV(3,6,31,22))
+	if (WA.Version < QV(3,7,2,48))
 	{
-		GetWARegOptionString("LanguageName", walanguage, sizeof(walanguage), "English");
-		qFileLog("Too old version of the game. Suspending...");
-		M_TooOld();
-		return 1;
-	}
+		if (!EnableDPIAwareness())     qFileLog("The game's process doesn't need to be set DPI-aware.");
+		else                           qFileLog("The game's process has been made DPI-aware.");
 
-	Env.Sys.BPP = GetDeviceCaps(GetDC(0), BITSPIXEL);
-	if (WA.Version < QV(3,7,2,46) && Env.Sys.BPP < 32)
-	{
-		fFileLog("Too low colour depth in the system: %u. Notifying the user and suspending...", Env.Sys.BPP);
-		M_LowBPP(Env.Sys.BPP);
-		return 1;
-	}
+		if ((Env.Sys.DwmEnabled = DWMEnabled()) != 0) qFileLog("DWM desktop composition is enabled.");
+		else                           qFileLog("DWM desktop composition is disabled.");
 
-	if (MH_Initialize() != MH_OK)
-	{
-		qFileLog("Failed to initialize the MinHook library. Suspending...");
-		return 1;
-	}
-
-	D3D9CREATE D3DCreate9 = 0;
-
-#ifdef VISTAUP
-	d3d9.dll = GetModuleHandle("d3d9.dll");
-	D3DCreate9 = &Direct3DCreate9;
-#else
-	if ((d3d9.dll = LoadLibrary("d3d9.dll")) != 0)
-	{
-		qFileLog("Successfully loaded the d3d9.dll library.");
-		if ((D3DCreate9 = (D3D9CREATE)GetProcAddress(d3d9.dll, "Direct3DCreate9")) == 0)
+		if (LoadLibrary("wkWndMode.dll"))
 		{
-			qFileLog("Failed to find the Direct3DCreate9 entry point in d3d9.dll. Suspending...");
+			qFileLog("User has wkWndMode.dll in his game's directory. Suspending...");
+			M_WndmodeDetected();
 			return 1;
 		}
-	}
-	else
-	{
-		qFileLog("Failed to load the d3d9.dll library. This system probably doesn't support D3D9. Suspending...");
-		return 1;
-	}
-#endif
 
-	if (MH_CreateHook(D3DCreate9, Direct3DCreate9Hook, (PVOID*)&Direct3DCreate9Next) != MH_OK)
-	{
-		qFileLog("Failed to hook Direct3DCreate9! Suspending...");
-		return 0;
-	}
-	else
-		qFileLog("Successfully hooked Direct3DCreate9.");
-
-	if (MH_EnableHook(D3DCreate9) != MH_OK)
-	{
-		qFileLog("Failed to enable the Direct3DCreate9 hook! Suspending...");
-		return 0;
-	}
-
-	//MH_CreateHook(&DirectDrawCreate, DirectDrawCreateHook, (PVOID*)&DirectDrawCreateNext);
-	//MH_CreateHook(&DirectDrawCreateEx, DirectDrawCreateExHook, (PVOID*)&DirectDrawCreateExNext);
-
-	switch (WA.Version)
-	{
-		case QV(3,7,2,1):
+		if ((WA.Steam = SteamCheck()) != 0) qFileLog("User is running the Steam edition of the game.");
+		else								qFileLog("User is running the CD edition of the game.");
+		
+		if (WA.Version < QV(3,6,31,22))
 		{
-			if (!WA.Steam)
-			{
-				Offsets.Language = WA.PE.Offset(0x4FF748);
-				Offsets.HardwareCursors = WA.PE.Offset(0x4FF700);
-				Offsets.ResX = WA.PE.Offset(0x4FF6CC);
-				Offsets.ResY = WA.PE.Offset(0x4FF6D0);
-				Offsets.RunInBackground = WA.PE.Offset(0x0CBB85);
-				Offsets.AfxString = WA.PE.Offset(0x1F1CB0);
-				qFileLog("Loaded secondary offsets for the CD edition of 3.7.2.1.");
-			}
-			else //Steam
-			{
-				Offsets.Language = WA.PE.Offset(0x4FE740);
-				Offsets.HardwareCursors = WA.PE.Offset(0x4FE6F8);
-				Offsets.ResX = WA.PE.Offset(0x4FE6C4);
-				Offsets.ResY = WA.PE.Offset(0x4FE6C8);
-				Offsets.RunInBackground = WA.PE.Offset(0x0CB075); //xB85
-				Offsets.AfxString = WA.PE.Offset(0x1F0CB8);
-
-				qFileLog("Loaded secondary offsets offsets for the Steam edition of 3.7.2.1.");
-			}
-			break;
+			GetWARegOptionString("LanguageName", walanguage, sizeof(walanguage), "English");
+			qFileLog("Too old version of the game. Suspending...");
+			M_TooOld();
+			return 1;
 		}
 
-		case QV(3,7,0,0):
+		Env.Sys.BPP = GetDeviceCaps(GetDC(0), BITSPIXEL);
+		if (WA.Version < QV(3,7,2,46) && Env.Sys.BPP < 32)
 		{
-			if (WA.PE.FH->TimeDateStamp != 1355997673)
+			fFileLog("Too low colour depth in the system: %u. Notifying the user and suspending...", Env.Sys.BPP);
+			M_LowBPP(Env.Sys.BPP);
+			return 1;
+		}
+
+		if (MH_Initialize() != MH_OK)
+		{
+			qFileLog("Failed to initialize the MinHook library. Suspending...");
+			return 1;
+		}
+
+		D3D9CREATE D3DCreate9 = 0;
+
+	#ifdef VISTAUP
+		d3d9.dll = GetModuleHandle("d3d9.dll");
+		D3DCreate9 = &Direct3DCreate9;
+	#else
+		if ((d3d9.dll = LoadLibrary("d3d9.dll")) != 0)
+		{
+			qFileLog("Successfully loaded the d3d9.dll library.");
+			if ((D3DCreate9 = (D3D9CREATE)GetProcAddress(d3d9.dll, "Direct3DCreate9")) == 0)
 			{
-				fFileLog("User is running 3.7.0.0r1 (%u). Proceeding to the Light mode.", WA.PE.FH->TimeDateStamp);
-				Env.Light = true;
+				qFileLog("Failed to find the Direct3DCreate9 entry point in d3d9.dll. Suspending...");
+				return 1;
+			}
+		}
+		else
+		{
+			qFileLog("Failed to load the d3d9.dll library. This system probably doesn't support D3D9. Suspending...");
+			return 1;
+		}
+	#endif
+
+		if (MH_CreateHook(D3DCreate9, Direct3DCreate9Hook, (PVOID*)&Direct3DCreate9Next) != MH_OK)
+		{
+			qFileLog("Failed to hook Direct3DCreate9! Suspending...");
+			return 0;
+		}
+		else
+			qFileLog("Successfully hooked Direct3DCreate9.");
+
+		if (MH_EnableHook(D3DCreate9) != MH_OK)
+		{
+			qFileLog("Failed to enable the Direct3DCreate9 hook! Suspending...");
+			return 0;
+		}
+
+		//MH_CreateHook(&DirectDrawCreate, DirectDrawCreateHook, (PVOID*)&DirectDrawCreateNext);
+		//MH_CreateHook(&DirectDrawCreateEx, DirectDrawCreateExHook, (PVOID*)&DirectDrawCreateExNext);
+
+		switch (WA.Version)
+		{
+			case QV(3,7,2,1):
+			{
+				if (!WA.Steam)
+				{
+					Offsets.Language = WA.PE.Offset(0x4FF748);
+					Offsets.HardwareCursors = WA.PE.Offset(0x4FF700);
+					Offsets.ResX = WA.PE.Offset(0x4FF6CC);
+					Offsets.ResY = WA.PE.Offset(0x4FF6D0);
+					Offsets.RunInBackground = WA.PE.Offset(0x0CBB85);
+					Offsets.AfxString = WA.PE.Offset(0x1F1CB0);
+					qFileLog("Loaded secondary offsets for the CD edition of 3.7.2.1.");
+				}
+				else //Steam
+				{
+					Offsets.Language = WA.PE.Offset(0x4FE740);
+					Offsets.HardwareCursors = WA.PE.Offset(0x4FE6F8);
+					Offsets.ResX = WA.PE.Offset(0x4FE6C4);
+					Offsets.ResY = WA.PE.Offset(0x4FE6C8);
+					Offsets.RunInBackground = WA.PE.Offset(0x0CB075); //xB85
+					Offsets.AfxString = WA.PE.Offset(0x1F0CB8);
+
+					qFileLog("Loaded secondary offsets offsets for the Steam edition of 3.7.2.1.");
+				}
 				break;
 			}
 
-			else
+			case QV(3,7,0,0):
 			{
-				Offsets.Language = WA.PE.Offset(0x4FD5E0);
-				Offsets.HardwareCursors = WA.PE.Offset(0x4FD598);
-				Offsets.ResX = WA.PE.Offset(0x4FD564);
-				Offsets.ResY = WA.PE.Offset(0x4FD568);
-				Offsets.RunInBackground = WA.PE.Offset(0x0CC115);
-				Offsets.AfxString = WA.PE.Offset(0x1F0CA8);
+				if (WA.PE.FH->TimeDateStamp != 1355997673)
+				{
+					fFileLog("User is running 3.7.0.0r1 (%u). Proceeding to the Light mode.", WA.PE.FH->TimeDateStamp);
+					Env.Light = true;
+					break;
+				}
 
-				qFileLog("Loaded secondary offsets for the CD edition of 3.7.0.0r2.");
+				else
+				{
+					Offsets.Language = WA.PE.Offset(0x4FD5E0);
+					Offsets.HardwareCursors = WA.PE.Offset(0x4FD598);
+					Offsets.ResX = WA.PE.Offset(0x4FD564);
+					Offsets.ResY = WA.PE.Offset(0x4FD568);
+					Offsets.RunInBackground = WA.PE.Offset(0x0CC115);
+					Offsets.AfxString = WA.PE.Offset(0x1F0CA8);
+
+					qFileLog("Loaded secondary offsets for the CD edition of 3.7.0.0r2.");
+				}
+				break;
 			}
-			break;
-		}
 		
-		default:
-			qFileLog("Proceeding to the Light initialization mode.");
-			Env.Light = true;
-			break;
-	}
+			default:
+				qFileLog("Proceeding to the Light initialization mode.");
+				Env.Light = true;
+				break;
+		}
 
-	CheckStaticWindowClass();
-	qFileLog("Waiting for the Direct3DCreate9 hook.");
+		CheckStaticWindowClass();
+		qFileLog("Waiting for the Direct3DCreate9 hook.");
+	}
+	else
+		qFileLog("wkD3D9Wnd is not needed anymore. Bye bye!");
 	return 1;
 }
 
 BOOL FinalizeD3D9Wnd()
 {
-	UninstallHooks();
+	if (WA.Version < QV(3,7,2,38))
+		UninstallHooks();
 	qFileLog("DLL_PROCESS_DETACH: Bye bye!");
 	return 1;
 }
