@@ -339,7 +339,7 @@ BOOL __stdcall SetWndParam(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx
 				return 1;
 			}
 
-			if (Settings.IG.Background)
+			if (Settings.IG.Background && WA.Version < QV(3,7,2,47))
 			{
 				qFileLog("SetWndParam: Active background is enabled: setting the W:A window as parent to the Worms2D window.");
 				SetParent(WA.Wnd.W2D, WA.Wnd.DX);
