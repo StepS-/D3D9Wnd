@@ -76,27 +76,27 @@ HRESULT WINAPI D3D9PresentHook(IDirect3DDevice9 *pthis, const RECT *pSourceRect,
 	#endif
 
 	if (Settings.Misc.FancyStartup) FancyUpdate();
+
+	HRESULT result = D3D9PresentNext(pthis, pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
+
 	if (WA.Version < QV(3,7,2,17))
 	{
-		HRESULT cooptest = pthis->TestCooperativeLevel();
-		switch (cooptest)
-		{
-		case D3DERR_DEVICELOST:
-			//	qFileLog("TestCooperativeLevel returned D3DERR_DEVICELOST");
-			Sleep(1);
-			return D3D_OK;
-		case D3DERR_DEVICENOTRESET:
-			qFileLog("TestCooperativeLevel returned D3DERR_DEVICENOTRESET, acknowledging and preparing to recreate the device.");
-			return D3DERR_DEVICELOST;
-		}
-
-		HRESULT result = D3D9PresentNext(pthis, pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
-		
 		if (result == D3DERR_DEVICELOST)
-			result = -1; //prevent W:A from reinitializing device when it's not possible: we handle this
-		return result;
+		{
+			HRESULT cooptest = pthis->TestCooperativeLevel();
+			switch (cooptest)
+			{
+			case D3DERR_DEVICELOST:
+				//	qFileLog("TestCooperativeLevel returned D3DERR_DEVICELOST");
+				Sleep(1);
+				return -1; //prevent W:A from reinitializing device when it's not possible: we handle this
+			case D3DERR_DEVICENOTRESET:
+				qFileLog("TestCooperativeLevel returned D3DERR_DEVICENOTRESET, acknowledging and preparing to recreate the device.");
+				return D3DERR_DEVICELOST;
+			}
+		}
 	}
-	return D3D9PresentNext(pthis, pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
+	return result;
 }
 
 HRESULT WINAPI D3D9ResetHook(IDirect3DDevice9* pthis, D3DPRESENT_PARAMETERS *pParams)
