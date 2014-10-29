@@ -475,10 +475,6 @@ BOOL __stdcall InstallHooks()
 			qFileLog("InstallHooks: FAILED to hook MoveWindow!");
 		else
 			qFileLog("InstallHooks: Successfully hooked MoveWindow.");
-		if (MH_CreateHook(&CreateDialogIndirectParamA, CreateDialogIndirectParamANew, (PVOID*)&CreateDialogIndirectParamANext) != MH_OK)
-			qFileLog("InstallHooks: FAILED to hook CreateDialogIndirectParamA!");
-		else
-			qFileLog("InstallHooks: Successfully hooked CreateDialogIndirectParamA.");
 		if (MH_CreateHook(&SetCursorPos, SetCursorPosNew, (PVOID*)&SetCursorPosNext) != MH_OK)
 			qFileLog("InstallHooks: FAILED to hook SetCursorPos!");
 		else

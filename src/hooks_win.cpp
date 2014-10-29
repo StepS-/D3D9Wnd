@@ -247,6 +247,33 @@ LRESULT CALLBACK CallWndProc(int nCode, WPARAM wParam, LPARAM lParam)
 				break;
 			}
 		}
+		else if (pwp->message == WM_INITDIALOG)
+		{
+			if (WA.Version < QV(3,7,2,46) && (!Settings.FR.Fullscreen || Settings.FR.AltFullscreen))
+			{
+				EnableWindow(WA.Wnd.DX, true);
+				SetWindowLong(pwp->hwnd, GWL_EXSTYLE, GetWindowLong(pwp->hwnd, (GWL_EXSTYLE)) | WS_EX_LAYERED | WS_EX_COMPOSITED);
+				SetLayeredWindowAttributes(pwp->hwnd, 0, 1, LWA_ALPHA);
+				//GDI layer workaround: prevent white mess on focus loss and maximization in frontend screens.
+
+				qFileLog("WindowProc: Applied the transparency layer to the new MFC dialog and enabled the DX window.");
+			}
+
+			if (GetWindow(pwp->hwnd, GW_OWNER) == WA.Wnd.DX)
+			{
+				qFileLog("WindowProc: A generic frontend MFC dialog screen has been entered.");
+
+				Env.EasterEgg.FrontendHidden = false;
+				WA.Wnd.MFC = pwp->hwnd;
+				GetWindowRect(pwp->hwnd, &WA.Rect.MFC);
+
+				if (WA.Version < QV(3,7,2,46) && (!Settings.FR.Fullscreen && !Settings.FR.AltFullscreen && !Settings.MM.Enable
+					&& (Settings.FR.Stretch || Settings.FR.ArbitrarySizing || Settings.FR.Centered)))
+				{
+					ClipCursorInFrontend();
+				}
+			}
+		}
 	}
 
 	return CallNextHookEx(hkb2, nCode, wParam, lParam);
