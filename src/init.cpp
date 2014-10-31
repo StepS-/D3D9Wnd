@@ -43,9 +43,6 @@ BOOL InitializeD3D9Wnd()
 		if (!EnableDPIAwareness())     qFileLog("The game's process doesn't need to be set DPI-aware.");
 		else                           qFileLog("The game's process has been made DPI-aware.");
 
-		if ((Env.Sys.DwmEnabled = DWMEnabled()) != 0) qFileLog("DWM desktop composition is enabled.");
-		else                           qFileLog("DWM desktop composition is disabled.");
-
 		if (LoadLibrary("wkWndMode.dll"))
 		{
 			qFileLog("User has wkWndMode.dll in his game's directory. Suspending...");
@@ -335,13 +332,6 @@ void LoadConfig()
 	GetMultiMonitorConfig();
 
 	qFileLog("Loaded all settings from the INI file.");
-
-	if (!Env.Sys.DwmEnabled && !Settings.IG.Background)
-	{
-		qFileLog("DWM desktop composition is disabled: so, forcefully enabling ActiveBackground.");
-		Settings.IG.Background = 1;
-		WritePrivateProfileInt("InGameSettings", "ActiveBackground", 1, Config);
-	}
 
 	if (WA.Version < QV(3,7,2,46) && !Settings.FR.Fullscreen && (Settings.FR.Centered || Settings.FR.Stretch || Settings.FR.ArbitrarySizing))
 	{

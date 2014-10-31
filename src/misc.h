@@ -153,8 +153,6 @@ struct D3D9wnd_environment{
 			PrimResY,
 			BPP,
 			Monitors;
-		BOOL
-			DwmEnabled;
 	} Sys;
 	struct CustomValues{
 		INT32

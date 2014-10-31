@@ -48,8 +48,6 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wKeyCode, LPARAM lParam)
 					{
 						if (ToggleActiveBackground(!Settings.IG.Background))
 							fFileLog("KeyboardProc: Toggled Active Background %s with Ctrl+H.", Settings.IG.Background ? "ON" : "OFF");
-						else
-							qFileLog("KeyboardProc: Attempted to toggle active background with Ctrl+H, but not done anything since it's forcibly enabled with DWM Desktop Composition disabled.");
 					}
 					break;
 
@@ -229,21 +227,6 @@ LRESULT CALLBACK CallWndProc(int nCode, WPARAM wParam, LPARAM lParam)
 
 			case WM_EXITSIZEMOVE:
 				if (!Settings.IG.Background && !Settings.IG.Stretch) StickWnd(WA.Wnd.W2D);
-				break;
-
-			case WM_DWMCOMPOSITIONCHANGED:
-				if ((Env.Sys.DwmEnabled = DWMEnabled()) == 0)
-				{
-					if (!Settings.IG.Background)
-					{
-						ToggleActiveBackground(TRUE);
-						qFileLog("WindowProc: DWM composition switched to OFF. Active background has been enabled.");
-					}
-					else
-						qFileLog("WindowProc: DWM composition switched to OFF.");
-				}
-				else
-					qFileLog("WindowProc: DWM composition switched to ON.");
 				break;
 			}
 		}
