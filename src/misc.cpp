@@ -134,7 +134,6 @@ BOOL D3D9Info::RefreshDevice(IDirect3DDevice9* lpDevice)
 	{
 		device.handle = lpDevice;
 		device.GetRasterStatus = VMTEntry(lpDevice, __GetRasterStatus);
-		device.Present = VMTEntry(lpDevice, __Present);
 		device.Release = VMTEntry(lpDevice, __Release);
 		device.Reset = VMTEntry(lpDevice, __Reset);
 		return 1;

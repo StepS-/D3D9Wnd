@@ -54,7 +54,6 @@ struct D3D9Info{
 	struct{
 		IDirect3DDevice9* handle;
 		PVOID
-			Present,
 			Reset,
 			GetRasterStatus,
 			Release;

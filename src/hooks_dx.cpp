@@ -66,37 +66,47 @@ HRESULT WINAPI D3D9GetRasterStatusHook(IDirect3DDevice9 *pthis, UINT iSwapChain,
 HRESULT WINAPI D3D9PresentHook(IDirect3DDevice9 *pthis, const RECT *pSourceRect, const RECT *pDestRect,
 	HWND hDestWindowOverride, const RGNDATA *pDirtyRegion)
 {
-	#ifdef LOGGING
-	if (PIPI < 4)
+	PVOID D3D9PresentNow = VMTEntry(pthis, __Present);
+	__try
 	{
-		PIPI++;
-		fFileLog("IDirect3DDevice9::Present: hook call %u%s", PIPI,
-			PIPI >= 4 ? ". Further calls are not recorded, except for some TestCooperativeLevel errors." : ".");
-	}
-	#endif
+		VMTEntry(pthis, __Present) = D3D9PresentNext; //temporary: to further prevent FRAPS dumbness
 
-	if (Settings.Misc.FancyStartup) FancyUpdate();
-
-	HRESULT result = D3D9PresentNext(pthis, pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
-
-	if (WA.Version < QV(3,7,2,17))
-	{
-		if (result == D3DERR_DEVICELOST)
+#ifdef LOGGING
+		if (PIPI < 4)
 		{
-			HRESULT cooptest = pthis->TestCooperativeLevel();
-			switch (cooptest)
+			PIPI++;
+			fFileLog("IDirect3DDevice9::Present: hook call %u%s", PIPI,
+				PIPI >= 4 ? ". Further calls are not recorded, except for some TestCooperativeLevel errors." : ".");
+		}
+#endif
+
+		if (Settings.Misc.FancyStartup) FancyUpdate();
+
+		HRESULT result = D3D9PresentNext(pthis, pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
+
+		if (WA.Version < QV(3,7,2,17))
+		{
+			if (result == D3DERR_DEVICELOST)
 			{
-			case D3DERR_DEVICELOST:
-				//	qFileLog("TestCooperativeLevel returned D3DERR_DEVICELOST");
-				Sleep(1);
-				return -1; //prevent W:A from reinitializing device when it's not possible: we handle this
-			case D3DERR_DEVICENOTRESET:
-				qFileLog("TestCooperativeLevel returned D3DERR_DEVICENOTRESET, acknowledging and preparing to recreate the device.");
-				return D3DERR_DEVICELOST;
+				HRESULT cooptest = pthis->TestCooperativeLevel();
+				switch (cooptest)
+				{
+				case D3DERR_DEVICELOST:
+					//	qFileLog("TestCooperativeLevel returned D3DERR_DEVICELOST");
+					Sleep(1);
+					return -1; //prevent W:A from reinitializing device when it's not possible: we handle this
+				case D3DERR_DEVICENOTRESET:
+					qFileLog("TestCooperativeLevel returned D3DERR_DEVICENOTRESET, acknowledging and preparing to recreate the device.");
+					return D3DERR_DEVICELOST;
+				}
 			}
 		}
+		return result;
 	}
-	return result;
+	__finally
+	{
+		VMTEntry(pthis, __Present) = D3D9PresentNow;
+	}
 }
 
 HRESULT WINAPI D3D9ResetHook(IDirect3DDevice9* pthis, D3DPRESENT_PARAMETERS *pParams)
@@ -169,15 +179,15 @@ HRESULT WINAPI D3D9CreateDeviceHook(IDirect3D9 *pthis, UINT Adapter, D3DDEVTYPE 
 
 		if (WA.Version < QV(3,7,2,17) || (!InGame() && Settings.Misc.FancyStartup && !Settings.FR.Fullscreen && !Settings.FR.AltFullscreen))
 		{
-			if (!D3D9PresentNext)
-			if (MH_CreateHook(d3d9.device.Present, D3D9PresentHook, (PVOID*)&D3D9PresentNext) == MH_OK)
+			DWORD dwOldProt = 0;
+			if (VirtualProtect((PVOID)&VMTEntry(d3d9.device.handle, __Present), 4, PAGE_READWRITE, &dwOldProt))
 			{
-				qFileLog("Successfully hooked IDirect3DDevice9::Present.");
-				if (MH_EnableHook(d3d9.device.Present) != MH_OK)
-					qFileLog("FAILED to enable the IDirect3DDevice9::Present hook!");
+				D3D9PresentNext = (D3D9DEVICE_PRESENT)VMTEntry(d3d9.device.handle, __Present);
+				VMTEntry(d3d9.device.handle, __Present) = &D3D9PresentHook;
+				qFileLog("Patched vftable for Present.");
 			}
 			else
-				qFileLog("FAILED to hook IDirect3DDevice9::Present!");
+				qFileLog("FAILURE when trying to prepare the Present patch!");
 		}
 
 		if (!D3D9GetRasterStatusNext && (pParams->BackBufferHeight > (UINT)Env.Sys.PrimResY || pParams->BackBufferHeight < 120))
