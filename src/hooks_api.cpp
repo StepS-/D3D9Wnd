@@ -16,7 +16,8 @@ HWND WINAPI CreateWindowExANew(DWORD dwExStyle, LPCTSTR lpClassName, LPCTSTR lpW
 	{
 		if (!strcmp(lpClassName, "Worms2D") && !strcmp(lpWindowName, "Worms2D"))
 		{
-			qFileLog("CreateWindowEx: The Worms2D widow was summoned.");
+			dwExStyle |= WS_EX_TRANSPARENT;
+			qFileLog("CreateWindowEx: The Worms2D window was summoned and pwned.");
 			return WA.Wnd.W2D = CreateWindowExANext(dwExStyle, lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
 		}
 	}
