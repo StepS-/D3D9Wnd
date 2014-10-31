@@ -6,6 +6,7 @@
 
 HWND(WINAPI *CreateWindowExANext)(DWORD, LPCTSTR, LPCTSTR, DWORD, int, int, int, int, HWND, HMENU, HINSTANCE, LPVOID);
 BOOL(WINAPI *SetForegroundWindowNext)(HWND);
+BOOL(WINAPI *IsIconicNext)(HWND);
 BOOL(WINAPI *SetCursorPosNext)(int, int);
 BOOL(WINAPI *MoveWindowNext)(HWND, int, int, int, int, BOOL);
 
@@ -34,11 +35,18 @@ BOOL WINAPI SetForegroundWindowNew(HWND hWnd) //for 3.7.0.0
 	return SetForegroundWindowNext(hWnd);
 }
 
+BOOL WINAPI IsIconicNew(HWND hWnd)
+{
+	if (InGame() && hWnd == GetParent(WA.Wnd.W2D))
+		return TRUE; //fix high CPU usage on minimization in some older versions
+	return IsIconicNext(hWnd);
+}
+
 BOOL WINAPI SetCursorPosNew(int X, int Y)
 {
 	if (InGame())
 	{
-		if (!IsIconic(WA.Wnd.DX)) GetWindowRect(WA.Wnd.W2D, &WA.Rect.W2D);
+		GetWindowRect(WA.Wnd.W2D, &WA.Rect.W2D);
 		X += WA.Rect.W2D.left;
 		Y += WA.Rect.W2D.top;
 	}

@@ -465,6 +465,10 @@ BOOL __stdcall InstallHooks()
 			qFileLog("InstallHooks: FAILED to hook MoveWindow!");
 		else
 			qFileLog("InstallHooks: Successfully hooked MoveWindow.");
+		if (MH_CreateHook(&IsIconic, IsIconicNew, (PVOID*)&IsIconicNext) != MH_OK)
+			qFileLog("InstallHooks: FAILED to hook IsIconic!");
+		else
+			qFileLog("InstallHooks: Successfully hooked IsIconic.");
 		if (MH_CreateHook(&SetCursorPos, SetCursorPosNew, (PVOID*)&SetCursorPosNext) != MH_OK)
 			qFileLog("InstallHooks: FAILED to hook SetCursorPos!");
 		else
