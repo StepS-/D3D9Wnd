@@ -198,14 +198,13 @@ void GetMultiMonitorConfig()
 	Env.Act.VirtY = 0;
 	if (Settings.MM.Enable)
 	{
-		char Monitors[MAX_PATH];
+		INT32 MonCount = 0;
 		Settings.MM.Auto = GetPrivateProfileInt("MultiMonitor", "AutoSetResolution", 1, Config);
-		GetPrivateProfileString("MultiMonitor", "Monitors", "Max", Monitors, MAX_PATH, Config);
-		CharLower(Monitors);
-		if (!strcmp(Monitors, "max"))
+		MonCount = GetPrivateProfileInt("MultiMonitor", "Monitors", 0, Config);
+		if (MonCount <= 0)
 			Settings.MM.Monitors = Env.Sys.Monitors;
 		else
-			Settings.MM.Monitors = MinCap(MaxCap(atoi(Monitors), Env.Sys.Monitors), 1);
+			Settings.MM.Monitors = MinCap(MaxCap(MonCount, Env.Sys.Monitors), 1);
 		if (Settings.MM.Monitors >= Env.Sys.Monitors)
 		{
 			Env.Act.ResX = Env.Sys.VirtResX;
