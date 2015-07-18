@@ -1,6 +1,6 @@
 /*
  *  MinHook - The Minimalistic API Hooking Library for x64/x86
- *  Copyright (C) 2009-2014 Tsuda Kageyu.
+ *  Copyright (C) 2009-2015 Tsuda Kageyu.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,10 @@
  */
 
 #pragma once
+
+#if !(defined _M_IX86) && !(defined _M_X64)
+    #error MinHook supports only x86 and x64 systems.
+#endif
 
 #include <Windows.h>
 
@@ -69,7 +73,13 @@ typedef enum MH_STATUS
     MH_ERROR_MEMORY_ALLOC,
 
     // Failed to change the memory protection.
-    MH_ERROR_MEMORY_PROTECT
+    MH_ERROR_MEMORY_PROTECT,
+
+    // The specified module is not loaded.
+    MH_ERROR_MODULE_NOT_FOUND,
+
+    // The specified function is not found.
+    MH_ERROR_FUNCTION_NOT_FOUND
 }
 MH_STATUS;
 
@@ -77,7 +87,7 @@ MH_STATUS;
 // MH_QueueEnableHook or MH_QueueDisableHook.
 #define MH_ALL_HOOKS NULL
 
-#if defined __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -99,6 +109,20 @@ extern "C" {
     //                    used to call the original target function.
     //                    This parameter can be NULL.
     MH_STATUS WINAPI MH_CreateHook(LPVOID pTarget, LPVOID pDetour, LPVOID *ppOriginal);
+
+    // Creates a Hook for the specified API function, in disabled state.
+    // Parameters:
+    //   pszModule  [in]  A pointer to the loaded module name which contains the
+    //                    target function.
+    //   pszTarget  [in]  A pointer to the target function name, which will be
+    //                    overridden by the detour function.
+    //   pDetour    [in]  A pointer to the detour function, which will override
+    //                    the target function.
+    //   ppOriginal [out] A pointer to the trampoline function, which will be
+    //                    used to call the original target function.
+    //                    This parameter can be NULL.
+    MH_STATUS WINAPI MH_CreateHookApi(
+        LPCWSTR pszModule, LPCSTR pszProcName, LPVOID pDetour, LPVOID *ppOriginal);
 
     // Removes an already created hook.
     // Parameters:
@@ -136,7 +160,10 @@ extern "C" {
     // Applies all queued changes in one go.
     MH_STATUS WINAPI MH_ApplyQueued(VOID);
 
-#if defined __cplusplus
+    // Translates the MH_STATUS to its name as a string.
+    const char * WINAPI MH_StatusToString(MH_STATUS status);
+
+#ifdef __cplusplus
 }
 #endif
 

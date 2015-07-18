@@ -67,6 +67,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -79,6 +80,7 @@
       <PrecompiledHeader />
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -87,11 +89,13 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
       <ImageHasSafeExceptionHandlers>true</ImageHasSafeExceptionHandlers>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <AdditionalDependencies>version.lib;msvcrt-light.lib;MinHook\libMinHook.x86.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <EntryPointSymbol>DllMain</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="tools\tools.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tools\tools.h" />

@@ -8,14 +8,33 @@
 
 HMODULE d3d9;
 IDirect3D9* (WINAPI *Direct3DCreate9Next)(UINT);
-HRESULT (WINAPI *D3D9CreateDeviceNext)(IDirect3D9*, UINT, D3DDEVTYPE, HWND, DWORD, D3DPRESENT_PARAMETERS*, IDirect3DDevice9**);
+HRESULT(WINAPI *D3D9CreateDeviceNext)(IDirect3D9*, UINT, D3DDEVTYPE, HWND, DWORD, D3DPRESENT_PARAMETERS*, IDirect3DDevice9**);
+HRESULT(WINAPI *D3D9ResetNext)(IDirect3DDevice9*, D3DPRESENT_PARAMETERS*);
+
+HRESULT WINAPI D3D9ResetHook(IDirect3DDevice9* pthis, D3DPRESENT_PARAMETERS *pParams)
+{
+	pParams->Windowed = TRUE;
+	HRESULT result = D3D9ResetNext(pthis, pParams);
+	if (SUCCEEDED(result))
+		SetWindowPos(pParams->hDeviceWindow, 0, 0, 0, pParams->BackBufferWidth, pParams->BackBufferHeight, SWP_SHOWWINDOW | SWP_NOREDRAW | SWP_NOZORDER);
+	return result;
+}
 
 HRESULT WINAPI D3D9CreateDeviceHook(IDirect3D9 *pthis, UINT Adapter, D3DDEVTYPE DeviceType, HWND hFocusWindow, DWORD BehaviorFlags,
 	D3DPRESENT_PARAMETERS *pParams, IDirect3DDevice9 **ppReturnedDeviceInterface)
 {
 	pParams->Windowed = TRUE;
-	SetWindowPos(pParams->hDeviceWindow, 0, 0, 0, pParams->BackBufferWidth, pParams->BackBufferHeight, SWP_SHOWWINDOW | SWP_NOREDRAW | SWP_NOZORDER);
-	return D3D9CreateDeviceNext(pthis, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pParams, ppReturnedDeviceInterface);
+	HRESULT result = D3D9CreateDeviceNext(pthis, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pParams, ppReturnedDeviceInterface);
+	if (SUCCEEDED(result))
+	{
+		SetWindowPos(pParams->hDeviceWindow, 0, 0, 0, pParams->BackBufferWidth, pParams->BackBufferHeight, SWP_SHOWWINDOW | SWP_NOREDRAW | SWP_NOZORDER);
+		if (!D3D9ResetNext)
+		{
+			if (MH_CreateHook(VMTEntry(*ppReturnedDeviceInterface, 16), D3D9ResetHook, (PVOID*)&D3D9ResetNext) == MH_OK)
+				MH_EnableHook(VMTEntry(*ppReturnedDeviceInterface, 16));
+		}
+	}
+	return result;
 }
 
 IDirect3D9* WINAPI Direct3DCreate9Hook(UINT SDKVersion)
@@ -33,8 +52,8 @@ BOOL APIENTRY DllMain(HMODULE, DWORD ul_reason_for_call, LPVOID)
 {
 	if (ul_reason_for_call == DLL_PROCESS_ATTACH)
 	{
-		if (!LockCurrentInstance("D3D9Wnd")) //allow only one module within the same process
-			return 1;
+//		if (!LockCurrentInstance("D3D9Wnd")) //allow only one module within the same process
+//			return 1;
 		if ((d3d9 = LoadLibrary("d3d9.dll")) != 0)
 		{
 			FARPROC D3D9Create = GetProcAddress(d3d9, "Direct3DCreate9");

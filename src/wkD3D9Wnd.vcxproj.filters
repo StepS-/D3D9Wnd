@@ -34,8 +34,5 @@
     <ClCompile Include="main.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="tools\tools.cpp">
-      <Filter>Sources\tools</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>
