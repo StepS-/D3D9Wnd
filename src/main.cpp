@@ -9,12 +9,23 @@ IDirect3D9* (WINAPI *Direct3DCreate9Next)(UINT);
 HRESULT(WINAPI *D3D9CreateDeviceNext)(IDirect3D9*, UINT, D3DDEVTYPE, HWND, DWORD, D3DPRESENT_PARAMETERS*, IDirect3DDevice9**);
 HRESULT(WINAPI *D3D9ResetNext)(IDirect3DDevice9*, D3DPRESENT_PARAMETERS*);
 
+HWND(WINAPI *CreateDialogIndirectParamANext)(HINSTANCE, LPCDLGTEMPLATEA, HWND, DLGPROC, LPARAM);
+HWND WINAPI CreateDialogIndirectParamANew(HINSTANCE hInstance, LPCDLGTEMPLATEA lpTemplate, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam)
+{
+	HWND Wnd = CreateDialogIndirectParamANext(hInstance, lpTemplate, hWndParent, lpDialogFunc, dwInitParam);
+//	EnableWindow(hWndParent, true);
+	SetWindowLong(Wnd, GWL_EXSTYLE, GetWindowLong(Wnd, (GWL_EXSTYLE)) | WS_EX_LAYERED | WS_EX_COMPOSITED);
+	SetLayeredWindowAttributes(Wnd, 0, 1, LWA_ALPHA);
+	ShowWindow(Wnd, SW_SHOW);
+	return Wnd;
+}
+
 HRESULT WINAPI D3D9ResetHook(IDirect3DDevice9* pthis, D3DPRESENT_PARAMETERS *pParams)
 {
 	pParams->Windowed = TRUE;
 	HRESULT result = D3D9ResetNext(pthis, pParams);
 	if (SUCCEEDED(result))
-		SetWindowPos(pParams->hDeviceWindow, 0, 0, 0, pParams->BackBufferWidth, pParams->BackBufferHeight, SWP_SHOWWINDOW | SWP_NOREDRAW | SWP_NOZORDER);
+		SetWindowPos(pParams->hDeviceWindow, HWND_NOTOPMOST, 0, 0, pParams->BackBufferWidth, pParams->BackBufferHeight, SWP_SHOWWINDOW | SWP_NOREDRAW);
 	return result;
 }
 
@@ -25,7 +36,7 @@ HRESULT WINAPI D3D9CreateDeviceHook(IDirect3D9 *pthis, UINT Adapter, D3DDEVTYPE 
 	HRESULT result = D3D9CreateDeviceNext(pthis, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pParams, ppReturnedDeviceInterface);
 	if (SUCCEEDED(result))
 	{
-		SetWindowPos(pParams->hDeviceWindow, 0, 0, 0, pParams->BackBufferWidth, pParams->BackBufferHeight, SWP_SHOWWINDOW | SWP_NOREDRAW | SWP_NOZORDER);
+		SetWindowPos(pParams->hDeviceWindow, HWND_NOTOPMOST, 0, 0, pParams->BackBufferWidth, pParams->BackBufferHeight, SWP_SHOWWINDOW | SWP_NOREDRAW);
 		if (!D3D9ResetNext)
 		{
 			if (MH_CreateHook(VMTEntry(*ppReturnedDeviceInterface, 16), D3D9ResetHook, (PVOID*)&D3D9ResetNext) == MH_OK)
@@ -59,6 +70,8 @@ BOOL APIENTRY DllMain(HMODULE, DWORD ul_reason_for_call, LPVOID)
 			{
 				if (MH_CreateHook(D3D9Create, Direct3DCreate9Hook, (PVOID*)&Direct3DCreate9Next) == MH_OK)
 					MH_EnableHook(D3D9Create);
+				if (MH_CreateHook(&CreateDialogIndirectParamA, CreateDialogIndirectParamANew, (PVOID*)&CreateDialogIndirectParamANext) == MH_OK)
+					MH_EnableHook(&CreateDialogIndirectParamA);
 			}
 		}
 	}
