@@ -1,19 +1,19 @@
-//DLL tools for W:A.
+//DLL tools for W:A by StepS.
 
 #include "tools.h"
 
-QWORD GetFileVersionQ()
+QWORD GetModuleVersion(HMODULE hModule)
 {
-	char WApath[MAX_PATH];DWORD h;
+	char WApath[MAX_PATH]; DWORD h;
 	WORD V1,V2,V3,V4;
-	GetModuleFileName(0,WApath,MAX_PATH);
-	DWORD Size=GetFileVersionInfoSize(WApath,&h);
+	GetModuleFileNameA(hModule,WApath,MAX_PATH);
+	DWORD Size = GetFileVersionInfoSizeA(WApath,&h);
 	if(Size)
 	{
-		void* Buf=malloc(Size);
-		GetFileVersionInfo(WApath,h,Size,Buf);
-		VS_FIXEDFILEINFO *Info;DWORD Is;
-		if(VerQueryValue(Buf,"\\",(LPVOID*)&Info,(PUINT)&Is))
+		void* Buf = malloc(Size);
+		GetFileVersionInfoA(WApath,h,Size,Buf);
+		VS_FIXEDFILEINFO *Info; DWORD Is;
+		if(VerQueryValueA(Buf, "\\", (LPVOID*)&Info, (PUINT)&Is))
 		{
 			if(Info->dwSignature==0xFEEF04BD)
 			{
@@ -24,6 +24,7 @@ QWORD GetFileVersionQ()
 					return MAKEQWORD(V1, V2, V3, V4);
 			}
 		}
+		free(Buf);
 	}
 	return 0;
 }
@@ -80,13 +81,29 @@ BOOL WritePrivateProfileIntW(LPCWSTR lpAppName, LPCWSTR lpKeyName, int nInteger,
 	return WritePrivateProfileStringW(lpAppName, lpKeyName, lpString, lpFileName);
 }
 
+DOUBLE GetPrivateProfileDoubleA(LPCSTR lpAppName, LPCSTR lpKeyName, DOUBLE dDefault, LPCSTR lpFileName)
+{
+	CHAR lpString[32], lpDefault[32];
+	sprintf_s(lpDefault, "%f", dDefault);
+	GetPrivateProfileStringA(lpAppName, lpKeyName, lpDefault, lpString, 32, lpFileName);
+	return atof(lpString);
+}
+
+DOUBLE GetPrivateProfileDoubleW(LPCWSTR lpAppName, LPCWSTR lpKeyName, DOUBLE dDefault, LPCWSTR lpFileName)
+{
+	WCHAR lpString[32], lpDefault[32];
+	swprintf_s(lpDefault, L"%f", dDefault);
+	GetPrivateProfileStringW(lpAppName, lpKeyName, lpDefault, lpString, 32, lpFileName);
+	return _wtof(lpString);
+}
+
 LPSTR GetPathUnderModuleA(HMODULE hModule, CHAR OutBuf[MAX_PATH], LPCSTR FileName)
 {
 	CHAR* dirend;
 	if (GetModuleFileNameA(hModule, OutBuf, MAX_PATH))
 	if ((dirend = strrchr(OutBuf, '\\')) != 0)
 	{
-		strcpy_s(dirend + sizeof(CHAR), MAX_PATH, FileName);
+		strcpy_s(dirend + 1, MAX_PATH, FileName);
 		return OutBuf;
 	}
 	return 0;
@@ -98,65 +115,92 @@ LPWSTR GetPathUnderModuleW(HMODULE hModule, WCHAR OutBuf[MAX_PATH], LPCWSTR File
 	if (GetModuleFileNameW(hModule, OutBuf, MAX_PATH))
 	if ((dirend = wcsrchr(OutBuf, L'\\')) != 0)
 	{
-		wcscpy_s(dirend + sizeof(WCHAR), MAX_PATH, FileName);
+		wcscpy_s(dirend + 1, MAX_PATH, FileName);
 		return OutBuf;
 	}
 	return 0;
 }
 
-BOOL PatchMemData(ULONG dwAddr, PVOID pNewData, ULONG dwLen)
+QWORD GetFileSizeQ(HANDLE hFile)
 {
-	if (!dwLen || !pNewData || !dwAddr)
+	DWORD low, high;
+	low = GetFileSize(hFile, &high);
+	return MAKELONGLONG(high, low);
+}
+
+BOOL __stdcall PatchMemData(PVOID pAddr, size_t buf_len, PVOID pNewData, size_t data_len)
+{
+	if (!buf_len || !data_len || !pNewData || !pAddr || buf_len < data_len)
 	{
 		SetLastError(ERROR_INVALID_PARAMETER);
 		return 0;
 	}
 	DWORD dwLastProtection;
-	if (!VirtualProtect((void*)dwAddr, dwLen, PAGE_READWRITE, &dwLastProtection))
+	if (!VirtualProtect((void*)pAddr, data_len, PAGE_EXECUTE_READWRITE, &dwLastProtection))
 		return 0;
-	switch (dwLen)
+	memcpy_s(pAddr, buf_len, pNewData, data_len);
+	return VirtualProtect((void*)pAddr, data_len, dwLastProtection, &dwLastProtection);
+}
+
+BOOL __stdcall PatchMemStringA(PVOID pAddr, size_t dest_len, LPSTR lpString) { return PatchMemData(pAddr, dest_len, lpString, strlen(lpString) + 1); }
+BOOL __stdcall PatchMemStringW(PVOID pAddr, size_t dest_len, LPWSTR lpString) { return PatchMemData(pAddr, dest_len * 2, lpString, wcslen(lpString) * 2 + 2); }
+
+BOOL __stdcall InsertJump(PVOID pDest, size_t dwPatchSize, PVOID pCallee, DWORD dwJumpType)
+{
+	if (dwPatchSize >= 5 && pDest)
 	{
-		case 1:
-			*(PBYTE)dwAddr = *(PBYTE)pNewData;
+		DWORD OpSize = 5, OpCode = 0xE9;
+		PBYTE dest = (PBYTE)pDest;
+		switch (dwJumpType)
+		{
+		case IJ_PUSHRET:
+			OpSize = 6;
+			OpCode = 0x68;
 			break;
-		case 2:
-			*(PWORD)dwAddr = *(PWORD)pNewData;
+		case IJ_FARJUMP:
+			OpSize = 7;
+			OpCode = 0xEA;
 			break;
-		case 4:
-			*(PDWORD)dwAddr = *(PDWORD)pNewData;
+		case IJ_FARCALL:
+			OpSize = 7;
+			OpCode = 0x9A;
 			break;
-		case 8:
-			*(PQWORD)dwAddr = *(PQWORD)pNewData;
+		case IJ_CALL:
+			OpSize = 5;
+			OpCode = 0xE8;
 			break;
 		default:
-			memcpy_s((PVOID)dwAddr, dwLen, pNewData, dwLen);
+			OpSize = 5;
+			OpCode = 0xE9;
+			break;
+		}
+
+		if (dwPatchSize < OpSize)
+			return 0;
+
+		PatchMemVal(dest, (BYTE)OpCode);
+
+		switch (OpSize)
+		{
+		case 7:
+			PatchMemVal(dest + 1, pCallee);
+			WORD w_cseg;
+			__asm mov [w_cseg], cs;
+			PatchMemVal(dest + 5, w_cseg);
+			break;
+		case 6:
+			PatchMemVal(dest + 1, pCallee);
+			PatchMemVal<BYTE>(dest + 5, 0xC3);
+			break;
+		default:
+			PatchMemVal(dest + 1, (ULONG_PTR)pCallee - (ULONG_PTR)pDest - 5);
+			break;
+		}
+
+		for (size_t i = OpSize; i < dwPatchSize; i++)
+			PatchMemVal<BYTE>(dest + i, 0x90);
 	}
-	
-	return VirtualProtect((void*)dwAddr, dwLen, dwLastProtection, &dwLastProtection);
-}
-
-BOOL PatchMemQword(ULONG dwAddr, QWORD qNewValue) { return PatchMemData(dwAddr, &qNewValue, sizeof(QWORD)); }
-BOOL PatchMemDword(ULONG dwAddr, DWORD dwNewValue) { return PatchMemData(dwAddr, &dwNewValue, sizeof(DWORD)); }
-BOOL PatchMemWord(ULONG dwAddr, WORD wNewValue) { return PatchMemData(dwAddr, &wNewValue, sizeof(WORD)); }
-BOOL PatchMemByte(ULONG dwAddr, BYTE bNewValue) { return PatchMemData(dwAddr, &bNewValue, sizeof(BYTE)); }
-BOOL PatchMemStringA(ULONG dwAddr, LPSTR lpString) { return PatchMemData(dwAddr, lpString, strlen(lpString) + sizeof(CHAR)); }
-BOOL PatchMemStringW(ULONG dwAddr, LPWSTR lpString) { return PatchMemData(dwAddr, lpString, wcslen(lpString) + sizeof(WCHAR)); }
-
-BOOL PatchMemFloat(ULONG dwAddr, FLOAT fNewValue)
-{ 
-	DWORD dwLastProtection;
-	if (!VirtualProtect((void*)dwAddr, sizeof(FLOAT), PAGE_READWRITE, &dwLastProtection))
-		return 0;
-	*(FLOAT*)dwAddr = fNewValue;
-	return VirtualProtect((void*)dwAddr, sizeof(FLOAT), dwLastProtection, &dwLastProtection);
-}
-BOOL PatchMemDouble(ULONG dwAddr, DOUBLE dNewValue)
-{
-	DWORD dwLastProtection;
-	if (!VirtualProtect((void*)dwAddr, sizeof(DOUBLE), PAGE_READWRITE, &dwLastProtection))
-		return 0;
-	*(DOUBLE*)dwAddr = dNewValue;
-	return VirtualProtect((void*)dwAddr, sizeof(DOUBLE), dwLastProtection, &dwLastProtection);
+	return 0;
 }
 
 bool DataPatternCompare(LPCBYTE pData, LPCBYTE bMask, LPCSTR szMask)
@@ -167,19 +211,37 @@ bool DataPatternCompare(LPCBYTE pData, LPCBYTE bMask, LPCSTR szMask)
 	return (*szMask) == 0;
 }
 
-ULONG FindPattern(PBYTE bMask, LPSTR szMask, ULONG dwAddress, ULONG dwLen)
+ULONG_PTR FindPattern(PBYTE bMask, LPSTR szMask, ULONG_PTR dwAddress, size_t dwLen, BOOL backwards)
 {
-	for (ULONG i = 0; i < dwLen - strlen(szMask); i++)
-	if (DataPatternCompare((PBYTE)(dwAddress + i), bMask, szMask))
-		return (ULONG)(dwAddress + i);
+	if (!backwards)
+	{
+		for (size_t i = 0; i < dwLen - strlen(szMask); i++)
+			if (DataPatternCompare((PBYTE)(dwAddress + i), bMask, szMask))
+				return (ULONG)(dwAddress + i);
+	}
+	else
+	{
+		for (size_t i = dwLen - strlen(szMask); i > 0; i--)
+			if (DataPatternCompare((PBYTE)(dwAddress - i), bMask, szMask))
+				return (ULONG)(dwAddress - i);
+	}
 	return 0;
 }
 
-ULONG FindPatternPrecise(PBYTE bMask, ULONG dwCount, ULONG dwAddress, ULONG dwLen)
+ULONG_PTR FindPatternPrecise(PBYTE bMask, size_t dwCount, ULONG_PTR dwAddress, size_t dwLen, BOOL backwards)
 {
-	for (ULONG i = 0; i < dwLen - dwCount; i++)
-	if (!memcmp((LPCVOID)(dwAddress + i), bMask, dwCount))
-		return (ULONG)(dwAddress + i);
+	if (!backwards)
+	{
+		for (size_t i = 0; i < dwLen - dwCount; i++)
+			if (!memcmp((LPCVOID)(dwAddress + i), bMask, dwCount))
+				return (ULONG)(dwAddress + i);
+	}
+	else
+	{
+		for (size_t i = dwLen - dwCount; i > 0; i--)
+			if (!memcmp((LPCVOID)(dwAddress - i), bMask, dwCount))
+				return (ULONG)(dwAddress - i);
+	}
 	return 0;
 }
 
@@ -193,30 +255,28 @@ void PEInfo::Reset(HMODULE hModule)
 	hModule = hModule == 0 ? GetModuleHandleA(0) : hModule;
 	Handle = hModule;
 	DOS = (IMAGE_DOS_HEADER*)hModule;
-	NT = (IMAGE_NT_HEADERS*)((DWORD)DOS + DOS->e_lfanew);
+	NT = (IMAGE_NT_HEADERS*)((ULONG_PTR)DOS + DOS->e_lfanew);
 	FH = (IMAGE_FILE_HEADER*)&NT->FileHeader;
 	OPT = (IMAGE_OPTIONAL_HEADER*)&NT->OptionalHeader;
 }
 
-DWORD PEInfo::Offset(DWORD off)
+ULONG_PTR PEInfo::Offset(size_t off)
 {
-	return (DWORD)Handle + off;
+	return (ULONG_PTR)Handle + off;
 }
 
 BOOL PEInfo::PtrInCode(PVOID ptr)
 {
-	if (DWORD(ptr) >= Offset(OPT->BaseOfCode) &&
-		DWORD(ptr) < Offset(OPT->BaseOfCode) + OPT->SizeOfCode)
-		return true;
-	return false;
+	return
+		ULONG_PTR(ptr) >= Offset(OPT->BaseOfCode) &&
+		ULONG_PTR(ptr) <  Offset(OPT->BaseOfCode) + OPT->SizeOfCode;
 }
 
 BOOL PEInfo::PtrInData(PVOID ptr)
 {
-	if (DWORD(ptr) >= Offset(OPT->BaseOfData) &&
-		DWORD(ptr) < Offset(OPT->BaseOfData) + OPT->SizeOfInitializedData + OPT->SizeOfUninitializedData)
-		return true;
-	return false;
+	return
+		ULONG_PTR(ptr) >= Offset(OPT->BaseOfData) &&
+		ULONG_PTR(ptr) <  Offset(OPT->BaseOfData) + OPT->SizeOfInitializedData + OPT->SizeOfUninitializedData;
 }
 
 char LocalMutexName[MAX_PATH];
@@ -256,9 +316,10 @@ void SetCursorCounter(int value)
 
 bool WASteamCheck()
 {
-	DWORD saddr;
+	ULONG_PTR saddr;
 	QWORD WAVersion = GetWAVersion();
-	if (WAVersion < QV(3,6,31,2)) return 0;
+	if (WAVersion < QV(3,6,31,2))
+		return 0;
 
 	switch (WAVersion)
 	{
@@ -270,8 +331,8 @@ bool WASteamCheck()
 		default:
 		{
 			PEInfo EXE(0);
-			ULONG VerStrSearchResult = FindPatternPrecise((PBYTE)"VERSION Worms Armageddon ",
-				25, EXE.OPT->ImageBase + EXE.OPT->BaseOfData, EXE.OPT->SizeOfInitializedData);
+			ULONG_PTR VerStrSearchResult = FindPatternPrecise((PBYTE)"VERSION Worms Armageddon ",
+				25, EXE.Offset(EXE.OPT->BaseOfData), EXE.OPT->SizeOfInitializedData);
 			EXE.~EXE();
 			if (VerStrSearchResult != NULL)
 			if (strstr((char*)VerStrSearchResult, "Steam"))
@@ -283,9 +344,7 @@ bool WASteamCheck()
 	return 0;
 
 DefinedCheck:
-	if (*(DWORD*)saddr == 'maet')
-		return 1;
-	return 0;
+	return *(PDWORD)saddr == 'maet' || *(PDWORD)saddr == 0;
 }
 
 LSTATUS GetRegistryStringA(HKEY hKey, LPCSTR lpSubKey, LPCSTR lpValueName, LPSTR OutBuf, DWORD BufSize, LPCSTR lpDefault)
@@ -423,6 +482,46 @@ int Mprintf(UINT uType, LPCSTR lpCaption, LPCSTR Format, ...)
 	return result;
 }
 
+BOOL FileExistsA(LPCSTR lpFileName)
+{
+	if (!lpFileName)
+		return 0;
+	DWORD fattr = GetFileAttributesA(lpFileName);
+	if (fattr != INVALID_FILE_ATTRIBUTES && !(fattr & FILE_ATTRIBUTE_DIRECTORY))
+		return 1;
+	return 0;
+}
+
+BOOL FileExistsW(LPCWSTR lpFileName)
+{
+	if (!lpFileName)
+		return 0;
+	DWORD fattr = GetFileAttributesW(lpFileName);
+	if (fattr != INVALID_FILE_ATTRIBUTES && !(fattr & FILE_ATTRIBUTE_DIRECTORY))
+		return 1;
+	return 0;
+}
+
+BOOL DirectoryExistsA(LPCSTR lpDirName)
+{
+	if (!lpDirName)
+		return 0;
+	DWORD fattr = GetFileAttributesA(lpDirName);
+	if (fattr != INVALID_FILE_ATTRIBUTES && (fattr & FILE_ATTRIBUTE_DIRECTORY))
+		return 1;
+	return 0;
+}
+
+BOOL DirectoryExistsW(LPCWSTR lpDirName)
+{
+	if (!lpDirName)
+		return 0;
+	DWORD fattr = GetFileAttributesW(lpDirName);
+	if (fattr != INVALID_FILE_ATTRIBUTES && (fattr & FILE_ATTRIBUTE_DIRECTORY))
+		return 1;
+	return 0;
+}
+
 int LogToFileA(HANDLE hFile, LPCSTR Format, ...)
 {
 	int result = 0;
@@ -487,6 +586,67 @@ BOOL RectCat(LPRECT Dest, LPRECT Source)
 		return 1;
 	}
 	return 0;
+}
+
+BOOL UnadjustWindowRectEx(LPRECT lpRect, DWORD dwStyle, BOOL fMenu, DWORD dwExStyle)
+{
+	RECT rc;
+	SetRectEmpty(&rc);
+	BOOL fRc = AdjustWindowRectEx(&rc, dwStyle, fMenu, dwExStyle);
+	if (fRc)
+	{
+		lpRect->left -= rc.left;
+		lpRect->top -= rc.top;
+		lpRect->right -= rc.right;
+		lpRect->bottom -= rc.bottom;
+	}
+	return fRc;
+}
+
+BOOL UnadjustWindowRect(LPRECT lpRect, DWORD dwStyle, BOOL fMenu)
+{
+	return UnadjustWindowRectEx(lpRect, dwStyle, fMenu, 0);
+}
+
+void PosToRect(RECT &Rect, int x, int y, int cx, int cy)
+{
+	Rect = { x, y, x + cx, y + cy };
+}
+
+void RectToPos(RECT &Rect, int &x, int &y, int &cx, int &cy)
+{
+	x = Rect.left;
+	y = Rect.top;
+	cx = Rect.right - Rect.left;
+	cy = Rect.bottom - Rect.top;
+}
+
+BOOL AdjustPosViaRectEx(int& x, int&y, int& cx, int& cy, DWORD dwStyle, BOOL fMenu, DWORD dwExStyle)
+{
+	RECT rc;
+	PosToRect(rc, x, y, cx, cy);
+	BOOL result = AdjustWindowRectEx(&rc, dwStyle, fMenu, dwExStyle);
+	RectToPos(rc, x, y, cx, cy);
+	return result;
+}
+
+BOOL AdjustPosViaRect(int& x, int&y, int& cx, int& cy, DWORD dwStyle, BOOL fMenu)
+{
+	return AdjustPosViaRectEx(x, y, cx, cy, dwStyle, fMenu, 0);
+}
+
+BOOL UnadjustPosViaRectEx(int& x, int&y, int& cx, int& cy, DWORD dwStyle, BOOL fMenu, DWORD dwExStyle)
+{
+	RECT rc;
+	PosToRect(rc, x, y, cx, cy);
+	BOOL result = UnadjustWindowRectEx(&rc, dwStyle, fMenu, dwExStyle);
+	RectToPos(rc, x, y, cx, cy);
+	return result;
+}
+
+BOOL UnadjustPosViaRect(int& x, int&y, int& cx, int& cy, DWORD dwStyle, BOOL fMenu)
+{
+	return UnadjustPosViaRectEx(x, y, cx, cy, dwStyle, fMenu, 0);
 }
 
 LPCSTR DispChangeErrorStrA(LONG ErrorCode)
@@ -587,4 +747,20 @@ BOOL CmdOption(LPCSTR lpCmdOption) // from WormKitDS
 		}
 	}
 	return 0;
+}
+
+char *_strtrim(char *lpStr)
+{
+	while (isspace(*lpStr))
+		lpStr++;
+
+	if (*lpStr == 0)
+		return lpStr;
+
+	char *strEnd = lpStr + strlen(lpStr) - 1;
+	while (strEnd > lpStr && isspace(*strEnd)) strEnd--;
+
+	*(strEnd + 1) = 0;
+
+	return lpStr;
 }

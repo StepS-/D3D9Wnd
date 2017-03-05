@@ -204,7 +204,7 @@ void GetMultiMonitorConfig()
 		if (MonCount <= 0)
 			Settings.MM.Monitors = Env.Sys.Monitors;
 		else
-			Settings.MM.Monitors = MinCap(MaxCap(MonCount, Env.Sys.Monitors), 1);
+			Settings.MM.Monitors = EnforceRange(MonCount, 1, Env.Sys.Monitors);
 		if (Settings.MM.Monitors >= Env.Sys.Monitors)
 		{
 			Env.Act.ResX = Env.Sys.VirtResX;
@@ -339,7 +339,7 @@ void LoadConfig()
 			if (*(DWORD*)Offsets.HardwareCursors != 0)
 			{
 				qFileLog("Hardware cursors are enabled with Centered/Stretched/Custom frontend. Disabling and throwing an info box.");
-				PatchMemDword(Offsets.HardwareCursors, 0);
+				PatchMemVal<DWORD>(Offsets.HardwareCursors, 0);
 				M_HardwareCursorsDisabled();
 			}
 		}
@@ -367,7 +367,7 @@ void WriteRunInBackground()
 		if (RBGSearchResult != NULL)
 		{
 			Offsets.RunInBackground = RBGSearchResult + 11;
-			if (PatchMemDword(Offsets.RunInBackground, 0))
+			if (PatchMemVal<DWORD>(Offsets.RunInBackground, 0))
 				qFileLog("Patched the game in Light mode to prevent it from self-minimizing.");
 			else
 				qFileLog("Something went WRONG when patching the game in Light mode to prevent it from self-minimizing!");
@@ -376,7 +376,7 @@ void WriteRunInBackground()
 			qFileLog("Failed to find where to patch RunInBackground in Light mode!");
 	}
 	else
-	if (PatchMemDword(Offsets.RunInBackground, 0))
+	if (PatchMemVal<DWORD>(Offsets.RunInBackground, 0))
 		qFileLog("Patched the game in predefined mode to prevent it from self-minimizing.");
 	else
 		qFileLog("Something went WRONG when patching the game in predefined mode to prevent it from self-minimizing!");
@@ -395,7 +395,7 @@ void CheckStaticWindowClass()
 			if (AFXSearchResult != NULL)
 			{
 				Offsets.AfxString = AFXSearchResult;
-				if (PatchMemStringA(Offsets.AfxString, "ArmageddonWindowed"))
+				if (PatchMemStringA((PVOID)Offsets.AfxString, 19, "ArmageddonWindowed"))
 					qFileLog("Patched the game's window class in Light mode.");
 				else
 					qFileLog("Something went WRONG when patching the game's window class in Light mode!");
@@ -405,7 +405,7 @@ void CheckStaticWindowClass()
 		}
 		else
 		{
-			if (PatchMemStringA(Offsets.AfxString, "ArmageddonWindowed"))
+			if (PatchMemStringA((PVOID)Offsets.AfxString, 19, "ArmageddonWindowed"))
 				qFileLog("Patched the game's window class in predefined mode.");
 			else
 				qFileLog("Something went WRONG when patching the game's window class in predefined mode!");
