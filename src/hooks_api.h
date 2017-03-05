@@ -8,6 +8,7 @@ BOOL WINAPI SetForegroundWindowNew(HWND hWnd);
 BOOL WINAPI IsIconicNew(HWND hWnd);
 BOOL WINAPI SetCursorPosNew(int X, int Y);
 BOOL WINAPI MoveWindowNew(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint);
+BOOL WINAPI SetWindowPosNew(HWND, HWND, int, int, int, int, UINT);
 //BOOL WINAPI GetCursorPosNew(LPPOINT lpPoint);
 
 extern HWND(WINAPI *CreateDialogIndirectParamANext)(HINSTANCE, LPCDLGTEMPLATEA, HWND, DLGPROC, LPARAM);
@@ -16,4 +17,5 @@ extern BOOL(WINAPI *SetForegroundWindowNext)(HWND);
 extern BOOL(WINAPI *IsIconicNext)(HWND);
 extern BOOL(WINAPI *SetCursorPosNext)(int, int);
 extern BOOL(WINAPI *MoveWindowNext)(HWND, int, int, int, int, BOOL);
+extern BOOL(WINAPI *SetWindowPosNext)(HWND, HWND, int, int, int, int, UINT);
 //extern BOOL(WINAPI *GetCursorPosNext)(LPPOINT);

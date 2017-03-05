@@ -9,6 +9,15 @@ BOOL(WINAPI *SetForegroundWindowNext)(HWND);
 BOOL(WINAPI *IsIconicNext)(HWND);
 BOOL(WINAPI *SetCursorPosNext)(int, int);
 BOOL(WINAPI *MoveWindowNext)(HWND, int, int, int, int, BOOL);
+BOOL(WINAPI *SetWindowPosNext)(HWND, HWND, int, int, int, int, UINT);
+
+BOOL WINAPI SetWindowPosNew(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags)
+{
+	BOOL result = SetWindowPosNext(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
+	if (!result)
+		fFileLog("SetWindowPos has FAILED! Error: 0x%X", GetLastError());
+	return result;
+}
 
 HWND WINAPI CreateWindowExANew(DWORD dwExStyle, LPCTSTR lpClassName, LPCTSTR lpWindowName, DWORD dwStyle, int x, int y, 
 	int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam)

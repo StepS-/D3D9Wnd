@@ -306,7 +306,7 @@ void LoadConfig()
 	Settings.FR.Xsize = GetPrivateProfileInt("FrontendSettings", "Xsize", 640, Config);
 	Settings.FR.Ysize = GetPrivateProfileInt("FrontendSettings", "Ysize", 480, Config);
 
-	Settings.IG.WindowBorder = GetPrivateProfileInt("InGameSettings", "WindowBorder", 0, Config);
+	Settings.IG.WindowBorder = GetPrivateProfileInt("InGameSettings", "WindowBorder", 1, Config);
 	Settings.IG.Stretch = GetPrivateProfileInt("InGameSettings", "Stretch", 0, Config);
 	Settings.IG.QuickInfo = GetPrivateProfileInt("InGameSettings", "QuickInfo", 1, Config);
 	Settings.IG.TopLeftPosition = GetPrivateProfileInt("InGameSettings", "TopLeftPosition", 0, Config);
@@ -318,8 +318,8 @@ void LoadConfig()
 	if (WA.Version < QV(3,7,2,47))
 	{
 		Settings.FR.Background = GetPrivateProfileInt("FrontendSettings", "RunInBackground", 1, Config);
-		Settings.IG.Background = GetPrivateProfileInt("InGameSettings", "ActiveBackground", 1, Config);
-		Settings.IG.AutoUnpin = GetPrivateProfileInt("InGameSettings", "AutoUnpin", 1, Config);
+		Settings.IG.Background = 1;
+		Settings.IG.AutoUnpin = 1;
 	}
 	else
 	{
@@ -460,6 +460,10 @@ BOOL __stdcall InstallHooks()
 		else
 			qFileLog("InstallHooks: Successfully hooked CreateWindowExA.");
 
+		if (MH_CreateHook(&SetWindowPos, SetWindowPosNew, (PVOID*)&SetWindowPosNext) != MH_OK)
+			qFileLog("InstallHooks: FAILED to hook SetWindowPos!");
+		else
+			qFileLog("InstallHooks: Successfully hooked SetWindowPos.");
 		if (MH_CreateHook(&MoveWindow, MoveWindowNew, (PVOID*)&MoveWindowNext) != MH_OK)
 			qFileLog("InstallHooks: FAILED to hook MoveWindow!");
 		else

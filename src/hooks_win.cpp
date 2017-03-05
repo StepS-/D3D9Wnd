@@ -43,14 +43,6 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wKeyCode, LPARAM lParam)
 					fFileLog("KeyboardProc: Switch to %s triggered via keyboard.", Settings.Misc.NoTopmost ? "no topmost" : "topmost");
 					break;
 
-				case 'H': // H - active background
-					if (WA.Version < QV(3,7,2,47))
-					{
-						if (ToggleActiveBackground(!Settings.IG.Background))
-							fFileLog("KeyboardProc: Toggled Active Background %s with Ctrl+H.", Settings.IG.Background ? "ON" : "OFF");
-					}
-					break;
-
 				case 'D': // D - quick window border :)
 					if (!Settings.IG.Stretch || (WA.BB.Width < Env.Act.ResX || WA.BB.Height < Env.Act.ResY))
 					{
@@ -76,7 +68,7 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wKeyCode, LPARAM lParam)
 							{
 								DWORD Style = GetWindowLong(WA.Wnd.DX, GWL_STYLE) | WS_CAPTION;
 								SetWindowLong(WA.Wnd.DX, GWL_STYLE, Style);
-								SetWindowLong(WA.Wnd.DX, GWL_STYLE, GetWindowLong(WA.Wnd.DX, GWL_STYLE) &~WS_MAXIMIZEBOX);
+								SetWindowLong(WA.Wnd.DX, GWL_STYLE, GetWindowLong(WA.Wnd.DX, GWL_STYLE) &~WS_MAXIMIZEBOX &~WS_MINIMIZEBOX);
 								AdjustWindowRect(&ClRect, Style, 0);
 								SetWindowPos(WA.Wnd.DX, HWND_TOP, 0, 0, ClRect.right - ClRect.left, ClRect.bottom - ClRect.top, SWP_NOMOVE | SWP_NOZORDER);
 								GetWindowRect(WA.Wnd.DX, &WRect);
@@ -100,7 +92,6 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wKeyCode, LPARAM lParam)
 						if (!Settings.IG.TopLeftPosition)
 						{
 							SetWindowPos(WA.Wnd.DX, NULL, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-							if (!Settings.IG.Background) StickWnd(WA.Wnd.W2D);
 							Settings.IG.TopLeftPosition = true;
 						}
 
@@ -111,7 +102,6 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wKeyCode, LPARAM lParam)
 							int newx = (Env.Act.ResX / 2) - (WArect.right - WArect.left) / 2;
 							int newy = (Env.Act.ResY / 2) - (WArect.bottom - WArect.top) / 2;
 							SetWindowPos(WA.Wnd.DX, NULL, newx, newy, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-							if (!Settings.IG.Background) StickWnd(WA.Wnd.W2D);
 							Settings.IG.TopLeftPosition = false;
 						}
 
@@ -133,7 +123,7 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wKeyCode, LPARAM lParam)
 					Env.EasterEgg.InControl = !Env.EasterEgg.InControl;
 					fFileLog("Easter egg toggled %s!", Env.EasterEgg.InControl ? "ON" : "OFF");
 				}
-				
+
 				else if (Env.EasterEgg.InControl)
 				{
 					if (wKeyCode >= '1' && wKeyCode <= '9')
@@ -179,7 +169,7 @@ LRESULT CALLBACK CallWndProc(int nCode, WPARAM wParam, LPARAM lParam)
 		{
 			switch (pwp->message)
 			{
-			case  WM_ACTIVATEAPP:
+			case WM_ACTIVATEAPP:
 				if (InGame())
 				{
 					if (Settings.IG.AutoUnpin)
@@ -193,7 +183,7 @@ LRESULT CALLBACK CallWndProc(int nCode, WPARAM wParam, LPARAM lParam)
 							qFileLog("WindowProc: Lost focus and auto-unpinned the cursor.");
 						}
 
-						else if (Settings.IG.Stretch || (WA.BB.Width >= Env.Sys.PrimResX || WA.BB.Height >= Env.Sys.PrimResY))
+						else// if (Settings.IG.Stretch || (WA.BB.Width >= Env.Sys.PrimResX || WA.BB.Height >= Env.Sys.PrimResY))
 						{
 							ShowWindow(WA.Wnd.W2D, SW_SHOW);
 							ShowCursorN(-1);
@@ -203,7 +193,7 @@ LRESULT CALLBACK CallWndProc(int nCode, WPARAM wParam, LPARAM lParam)
 
 						UpdateWACaption();
 					}
-					
+
 					if (pwp->wParam)
 					{
 						SendMessage(WA.Wnd.W2D, WM_KEYUP, VK_MENU, 0); //Workaround: send WM_KEYUP to Alt.
@@ -225,10 +215,20 @@ LRESULT CALLBACK CallWndProc(int nCode, WPARAM wParam, LPARAM lParam)
 				}
 				break;
 
-			case WM_EXITSIZEMOVE:
-				if (!Settings.IG.Background && !Settings.IG.Stretch) StickWnd(WA.Wnd.W2D);
+			case WM_SETCURSOR:
+				if (InGame())
+				if (LOWORD(pwp->lParam) == HTCLIENT && IsWindowVisible(WA.Wnd.W2D))
+					ShowCursorN(-1);
+				else
+					ShowCursorN(0);
 				break;
 			}
+		}
+		else if (InGame() && pwp->hwnd == WA.Wnd.W2D)
+		{
+			if (pwp->message == WM_SETCURSOR)
+			if (LOWORD(pwp->lParam) == HTCLIENT && IsWindowVisible(WA.Wnd.W2D))
+				ShowCursorN(-1);
 		}
 		else if (pwp->message == WM_INITDIALOG)
 		{
@@ -271,7 +271,7 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
 		{
 			if (InGame())
 			{
-				if (wParam == WM_LBUTTONDOWN && !IsWindowVisible(WA.Wnd.W2D))
+				if ((wParam == WM_LBUTTONDOWN || wParam == WM_LBUTTONUP) && !IsWindowVisible(WA.Wnd.W2D))
 				{
 					ShowCursorN(-1);
 					SetCursorPos(WA.BB.Width / 2, WA.BB.Height / 2);

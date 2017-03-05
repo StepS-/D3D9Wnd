@@ -121,7 +121,7 @@ HRESULT WINAPI D3D9ResetHook(IDirect3DDevice9* pthis, D3DPRESENT_PARAMETERS *pPa
 	if (!Settings.FR.Fullscreen || Settings.FR.AltFullscreen || InGame())
 		pParams->Windowed = TRUE;
 
-	SetWndParam(pParams->hDeviceWindow, 0, 0, 0, pParams->BackBufferWidth, pParams->BackBufferHeight, SWP_SHOWWINDOW | SWP_NOREDRAW);
+	SetWndParam(pParams->hDeviceWindow, 0, 0, 0, pParams->BackBufferWidth, pParams->BackBufferHeight, SWP_SHOWWINDOW/* | SWP_NOREDRAW*/);
 
 	HRESULT result = D3D9ResetNext(pthis, pParams);
 	if (SUCCEEDED(result))
@@ -145,7 +145,7 @@ HRESULT WINAPI D3D9CreateDeviceHook(IDirect3D9 *pthis, UINT Adapter, D3DDEVTYPE 
 	if (!Settings.FR.Fullscreen || Settings.FR.AltFullscreen || InGame())
 		pParams->Windowed = TRUE;
 
-	SetWndParam(pParams->hDeviceWindow, 0, 0, 0, pParams->BackBufferWidth, pParams->BackBufferHeight, SWP_SHOWWINDOW | SWP_NOREDRAW);
+	SetWndParam(pParams->hDeviceWindow, 0, 0, 0, pParams->BackBufferWidth, pParams->BackBufferHeight, SWP_SHOWWINDOW/* | SWP_NOREDRAW*/);
 
 	HRESULT result = D3D9CreateDeviceNext(pthis, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pParams, ppReturnedDeviceInterface);
 	if (SUCCEEDED(result))
@@ -193,7 +193,8 @@ HRESULT WINAPI D3D9CreateDeviceHook(IDirect3D9 *pthis, UINT Adapter, D3DDEVTYPE 
 		if (!D3D9GetRasterStatusNext && (pParams->BackBufferHeight > (UINT)Env.Sys.PrimResY || pParams->BackBufferHeight < 120))
 		{
 			BufDif = pParams->BackBufferHeight / (DOUBLE)Env.Sys.PrimResY;
-			if (MH_CreateHook(d3d9.device.GetRasterStatus, D3D9GetRasterStatusHook, (PVOID*)&D3D9GetRasterStatusNext) == MH_OK)
+			MH_STATUS hookGRS = MH_CreateHook(d3d9.device.GetRasterStatus, D3D9GetRasterStatusHook, (PVOID*)&D3D9GetRasterStatusNext);
+			if (hookGRS == MH_OK || hookGRS == MH_ERROR_ALREADY_CREATED)
 			{
 				qFileLog("Successfully hooked IDirect3DDevice9::GetRasterStatus, required for the extra-tall backbuffer size.");
 				if (MH_EnableHook(d3d9.device.GetRasterStatus) != MH_OK)
@@ -291,7 +292,7 @@ BOOL __stdcall SetWndParam(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx
 
 				if (cx <= Env.Act.ResX || cy <= Env.Act.ResY)
 				{
-					SetWindowLong(hWnd, GWL_STYLE, Style &~WS_MAXIMIZEBOX);
+					SetWindowLong(hWnd, GWL_STYLE, Style &~WS_MAXIMIZEBOX &~WS_MINIMIZEBOX);
 					fFileLog("SetWndParam: Window border was enabled, the related checks have been done, and rect adjusted. New window size: %dx%d.", cx, cy);
 				}
 				else

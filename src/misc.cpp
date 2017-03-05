@@ -24,9 +24,8 @@ BOOL UpdateWACaption()
 		qFileLog("Updating the W:A window caption.");
 		char watext[256];
 
-		sprintf_s(watext, "Worms Armageddon (windowed) | %u x %u | %s | %s | Active bg %s", WA.BB.Width, WA.BB.Height,
-			Settings.Misc.NoTopmost ? "No topmost" : "Topmost", ShowCursorCount() >= 0 ? "Unpinned" : "Pinned",
-			Settings.IG.Background ? "ON" : "OFF");
+		sprintf_s(watext, "Worms Armageddon (windowed) | %u x %u | %s | %s", WA.BB.Width, WA.BB.Height,
+			Settings.Misc.NoTopmost ? "No topmost" : "Topmost", ShowCursorCount() >= 0 ? "Unpinned" : "Pinned");
 
 		return SetWindowText(WA.Wnd.DX, watext);
 	}
@@ -65,7 +64,6 @@ BOOL StickWnd(HWND hWnd)
 	GetClientRect(WA.Wnd.DX, &WArect);
 	ClientToScreen(WA.Wnd.DX, (POINT*)&WArect);
 
-	qFileLog("Some window has followed the game window.");
 	return SetWindowPos(hWnd, NULL, WArect.left, WArect.top, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 }
 
