@@ -459,11 +459,12 @@ BOOL __stdcall InstallHooks()
 			qFileLog("InstallHooks: FAILED to hook CreateWindowExA!");
 		else
 			qFileLog("InstallHooks: Successfully hooked CreateWindowExA.");
-
+#ifdef LOGGING
 		if (MH_CreateHook(&SetWindowPos, SetWindowPosNew, (PVOID*)&SetWindowPosNext) != MH_OK)
 			qFileLog("InstallHooks: FAILED to hook SetWindowPos!");
 		else
 			qFileLog("InstallHooks: Successfully hooked SetWindowPos.");
+#endif
 		if (MH_CreateHook(&MoveWindow, MoveWindowNew, (PVOID*)&MoveWindowNext) != MH_OK)
 			qFileLog("InstallHooks: FAILED to hook MoveWindow!");
 		else
