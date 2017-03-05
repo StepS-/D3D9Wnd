@@ -9,4 +9,5 @@
 *.sdf
 *.user
 *.opensdf
+*.VC.opendb
 /bin
