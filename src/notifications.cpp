@@ -63,11 +63,21 @@ void M_UnsupportedFullscreenFrontend(int nWidth, int nHeight, LONG dwErrorCode)
 		Mprintf(MB_OK | MB_ICONWARNING | MB_TOPMOST, "Предупреждение модуля D3D9Wnd",
 		"Внимание: не удалось перевести игру в полноэкранный режим с разрешением %ux%u.\n"
 		"Ошибка: %s\n"
-		"Возможно, это разрешение не поддерживается вашей системой, монитором или видеокартой/драйверами. Сейчас произойдёт переключение в оконный режим.",
+		"Возможно, это разрешение не поддерживается вашей системой, монитором или "
+		"видеокартой/драйверами. Сейчас произойдёт переключение в оконный режим.\n"
+		"\n"
+		"Чтобы в будущем избежать подобных ошибок, отключите опции \"Fullscreen\" и "
+		"\"FullscreenAlternative\" в разделе [FrontendSettings] файла D3D9Wnd.ini, "
+		"либо задайте разрешение меню на поддерживаемое при помощи сторонних модулей "
+		"(например, SuperFrontendHD).",
 		nWidth, nHeight, DispChangeErrorStrA(dwErrorCode));
 	else Mprintf(MB_OK | MB_ICONWARNING | MB_TOPMOST, "D3D9Wnd warning",
 		"Warning: failed to set the required screen resolution of %ux%u for frontend.\n"
 		"Error: %s\n"
-		"It's probably unsupported by your system, monitor or GPU/drivers. Switching to windowed mode.",
+		"It's probably unsupported by your system, monitor or GPU/drivers. Switching to windowed mode.\n"
+		"\n"
+		"In order to avoid such errors in the future, disable the \"Fullscreen\" and "
+		"\"FullscreenAlternative\" options in the [FrontendSettings] section of D3D9Wnd.ini, "
+		"or change your front-end resolution using external modules (such as SuperFrontendHD).",
 		nWidth, nHeight, DispChangeErrorStrA(dwErrorCode));
 }

@@ -251,8 +251,7 @@ HRESULT WINAPI D3D9CreateDeviceHook(IDirect3D9 *pthis, UINT Adapter, D3DDEVTYPE 
 
 				if (!InGame())
 				{
-					WritePrivateProfileInt("FrontendSettings", "Fullscreen", Settings.FR.Fullscreen = false, Config);
-					WritePrivateProfileInt("FrontendSettings", "FullscreenAlternative", Settings.FR.AltFullscreen = false, Config);
+					Settings.FR.Fullscreen = false, Settings.FR.AltFullscreen = false;
 					SetWindowPos(pParams->hDeviceWindow, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOZORDER);
 					qFileLog("Letting the user know that Windowed Mode is going to be enabled in the Frontend.");
 					M_UnsupportedFullscreenFrontend(WA.BB.Width, WA.BB.Height, DISP_CHANGE_BADMODE);
@@ -458,8 +457,7 @@ BOOL __stdcall SetWndParam(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx
 					fFileLog("SetWndParam: FAILED to set the primary monitor's resolution to %ux%u for frontend in artificial fullscreen mode!"
 						"Error: %s. Switching to windowed mode and prompting the user.", WA.BB.Width, WA.BB.Height, DispChangeErrorStrA(dispChange));
 
-					WritePrivateProfileInt("FrontendSettings", "Fullscreen", Settings.FR.Fullscreen = false, Config);
-					WritePrivateProfileInt("FrontendSettings", "FullscreenAlternative", Settings.FR.AltFullscreen = false, Config);
+					Settings.FR.Fullscreen = false, Settings.FR.AltFullscreen = false;
 					SetWindowText(WA.Wnd.DX, "Worms Armageddon (windowed)");
 					M_UnsupportedFullscreenFrontend(WA.BB.Width, WA.BB.Height, dispChange);
 				}
