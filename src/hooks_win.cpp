@@ -12,7 +12,7 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wKeyCode, LPARAM lParam)
 	{
 		if (InGame())
 		{
-			if (KeyPressed(VK_CONTROL))
+			if (!Settings.IG.Fullscreen && KeyPressed(VK_CONTROL))
 			{
 				switch (wKeyCode)
 				{
@@ -152,7 +152,7 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wKeyCode, LPARAM lParam)
 				}
 			}
 
-			else if (wKeyCode == 'T')
+			else if (!Settings.FR.Fullscreen && wKeyCode == 'T')
 				ChangeTopmostState();
 		}
 	}
@@ -172,6 +172,9 @@ LRESULT CALLBACK CallWndProc(int nCode, WPARAM wParam, LPARAM lParam)
 			case WM_ACTIVATEAPP:
 				if (InGame())
 				{
+					if (Settings.IG.Fullscreen)
+						break;
+
 					if (Settings.IG.AutoUnpin)
 					{
 						if (!pwp->wParam)
@@ -216,7 +219,7 @@ LRESULT CALLBACK CallWndProc(int nCode, WPARAM wParam, LPARAM lParam)
 				break;
 
 			case WM_SETCURSOR:
-				if (InGame())
+				if (InGame() && !Settings.IG.Fullscreen)
 				if (LOWORD(pwp->lParam) == HTCLIENT && IsWindowVisible(WA.Wnd.W2D))
 					ShowCursorN(-1);
 				else
@@ -224,13 +227,13 @@ LRESULT CALLBACK CallWndProc(int nCode, WPARAM wParam, LPARAM lParam)
 				break;
 			}
 		}
-		else if (InGame() && pwp->hwnd == WA.Wnd.W2D)
+		else if (pwp->hwnd == WA.Wnd.W2D)
 		{
-			if (pwp->message == WM_SETCURSOR)
-			if (LOWORD(pwp->lParam) == HTCLIENT && IsWindowVisible(WA.Wnd.W2D))
+			if (InGame() && !Settings.IG.Fullscreen)
+			if (pwp->message == WM_SETCURSOR && LOWORD(pwp->lParam) == HTCLIENT && IsWindowVisible(WA.Wnd.W2D))
 				ShowCursorN(-1);
 		}
-		else if (pwp->message == WM_INITDIALOG)
+		else if (!InGame() && pwp->message == WM_INITDIALOG)
 		{
 			if (WA.Version < QV(3,7,2,46) && (!Settings.FR.Fullscreen || Settings.FR.AltFullscreen))
 			{
@@ -269,7 +272,7 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
 		MOUSEHOOKSTRUCT* pwp = (MOUSEHOOKSTRUCT*)lParam;
 		if (pwp->hwnd == WA.Wnd.DX)
 		{
-			if (InGame())
+			if (InGame() && !Settings.IG.Fullscreen)
 			{
 				if ((wParam == WM_LBUTTONDOWN || wParam == WM_LBUTTONUP) && !IsWindowVisible(WA.Wnd.W2D))
 				{

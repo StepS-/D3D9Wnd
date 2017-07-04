@@ -118,7 +118,7 @@ HRESULT WINAPI D3D9ResetHook(IDirect3DDevice9* pthis, D3DPRESENT_PARAMETERS *pPa
 
 	fFileLog("Expected backbuffer size: %ux%u", WA.BB.Width, WA.BB.Height);
 
-	if (!Settings.FR.Fullscreen || Settings.FR.AltFullscreen || InGame())
+	if ((!InGame() && (!Settings.FR.Fullscreen || Settings.FR.AltFullscreen)) || (InGame() && !Settings.IG.Fullscreen))
 		pParams->Windowed = TRUE;
 
 	SetWndParam(pParams->hDeviceWindow, 0, 0, 0, pParams->BackBufferWidth, pParams->BackBufferHeight, SWP_SHOWWINDOW/* | SWP_NOREDRAW*/);
@@ -142,7 +142,7 @@ HRESULT WINAPI D3D9CreateDeviceHook(IDirect3D9 *pthis, UINT Adapter, D3DDEVTYPE 
 	fFileLog("Expected backbuffer size: %ux%u", WA.BB.Width, WA.BB.Height);
 
 	SetWindowedMode:
-	if (!Settings.FR.Fullscreen || Settings.FR.AltFullscreen || InGame())
+	if ((!InGame() && (!Settings.FR.Fullscreen || Settings.FR.AltFullscreen)) || (InGame() && !Settings.IG.Fullscreen))
 		pParams->Windowed = TRUE;
 
 	SetWndParam(pParams->hDeviceWindow, 0, 0, 0, pParams->BackBufferWidth, pParams->BackBufferHeight, SWP_SHOWWINDOW/* | SWP_NOREDRAW*/);
@@ -281,6 +281,12 @@ BOOL __stdcall SetWndParam(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx
 		{
 			InGameHandled = true;
 			Settings.Misc.FancyStartup = false;
+
+			if (Settings.IG.Fullscreen)
+			{
+				qFileLog("SetWndParam: Returning. We are in fullscreen in-game mode: no further adjustments required.");
+				return TRUE;
+			}
 
 			if (Settings.IG.WindowBorder && !Settings.IG.Stretch && WA.BB.Width < Env.Act.ResX && WA.BB.Height < Env.Act.ResY)
 			{

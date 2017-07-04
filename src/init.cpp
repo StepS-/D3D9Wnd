@@ -306,6 +306,7 @@ void LoadConfig()
 	Settings.FR.Xsize = GetPrivateProfileInt("FrontendSettings", "Xsize", 640, Config);
 	Settings.FR.Ysize = GetPrivateProfileInt("FrontendSettings", "Ysize", 480, Config);
 
+	Settings.IG.Fullscreen = GetPrivateProfileInt("InGameSettings", "Fullscreen", 0, Config);
 	Settings.IG.WindowBorder = GetPrivateProfileInt("InGameSettings", "WindowBorder", 1, Config);
 	Settings.IG.Stretch = GetPrivateProfileInt("InGameSettings", "Stretch", 0, Config);
 	Settings.IG.QuickInfo = GetPrivateProfileInt("InGameSettings", "QuickInfo", 1, Config);

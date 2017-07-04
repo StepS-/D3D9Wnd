@@ -88,6 +88,7 @@ struct D3D9Wnd_settings{
 	} FR;
 	struct{
 		BOOL
+			Fullscreen,
 			WindowBorder,
 			Stretch,
 			QuickInfo,

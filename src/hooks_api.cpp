@@ -38,7 +38,7 @@ HWND WINAPI CreateWindowExANew(DWORD dwExStyle, LPCTSTR lpClassName, LPCTSTR lpW
 BOOL WINAPI SetForegroundWindowNew(HWND hWnd) //for 3.7.0.0
 {
 	if (hWnd == GetDesktopWindow())
-		if (InGame())
+		if (InGame() && !Settings.IG.Fullscreen)
 			return MinimizeWA();
 	
 	return SetForegroundWindowNext(hWnd);
@@ -46,14 +46,14 @@ BOOL WINAPI SetForegroundWindowNew(HWND hWnd) //for 3.7.0.0
 
 BOOL WINAPI IsIconicNew(HWND hWnd)
 {
-	if (InGame() && hWnd == GetParent(WA.Wnd.W2D))
+	if (InGame() && !Settings.IG.Fullscreen && hWnd == GetParent(WA.Wnd.W2D))
 		return TRUE; //fix high CPU usage on minimization in some older versions
 	return IsIconicNext(hWnd);
 }
 
 BOOL WINAPI SetCursorPosNew(int X, int Y)
 {
-	if (InGame())
+	if (InGame() && !Settings.IG.Fullscreen)
 	{
 		GetWindowRect(WA.Wnd.W2D, &WA.Rect.W2D);
 		X += WA.Rect.W2D.left;
@@ -73,7 +73,7 @@ BOOL WINAPI MoveWindowNew(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL
 		}
 	}
 
-	else if (hWnd == WA.Wnd.W2D)
+	else if (hWnd == WA.Wnd.W2D && !Settings.IG.Fullscreen)
 	{
 		if (Settings.IG.Stretch || nWidth >= Env.Act.ResX || nHeight >= Env.Act.ResY)
 		{
