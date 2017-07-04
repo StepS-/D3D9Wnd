@@ -71,22 +71,3 @@ void M_UnsupportedFullscreenFrontend(int nWidth, int nHeight, LONG dwErrorCode)
 		"It's probably unsupported by your system, monitor or GPU/drivers. Switching to windowed mode.",
 		nWidth, nHeight, DispChangeErrorStrA(dwErrorCode));
 }
-
-int MQ_UnsupportedFullscreenInGame(int nWidth, int nHeight, LONG dwErrorCode)
-{
-	if (RegistryLanguage("Russian"))
-		return Mprintf(MB_YESNO | MB_ICONWARNING | MB_TOPMOST, "Предупреждение модуля D3D9Wnd",
-			"Внимание: не удалось перевести игру в полноэкранный режим с разрешением %ux%u.\n"
-			"Ошибка: %s\n"
-			"Возможно, это разрешение не поддерживается вашей системой, монитором или видеокартой/драйверами. Переключиться в оконный режим?\n\n"
-			"\"ДА\" - Переключиться в оконный режим с разрешением %ux%u\n",
-			"\"НЕТ\" - Оставить полноэкранный режим со стандартным разрешением (1024x768 и т.д.)",
-			nWidth, nHeight, DispChangeErrorStrA(dwErrorCode), nWidth, nHeight);
-	else return Mprintf(MB_YESNO | MB_ICONWARNING | MB_TOPMOST, "D3D9Wnd warning",
-		"Warning: failed to set the required screen resolution of %ux%u for frontend.\n"
-		"Error: %s\n"
-		"It's probably unsupported by your system, monitor or GPU/drivers. Would you like to switch to the windowed mode?\n\n"
-		"\"YES\" - Switch to windowed mode at %ux%u\n"
-		"\"NO\" - Remain in fullscreen with a default resolution (1024x768 and so on)",
-		nWidth, nHeight, DispChangeErrorStrA(dwErrorCode), nWidth, nHeight);
-}

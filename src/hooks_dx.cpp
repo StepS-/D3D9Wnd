@@ -238,27 +238,10 @@ HRESULT WINAPI D3D9CreateDeviceHook(IDirect3D9 *pthis, UINT Adapter, D3DDEVTYPE 
 				}
 				else
 				{
-					if (!Settings.FR.Fullscreen)
-					{
-						qFileLog("Asking the user whether to switch to Windowed In-Game.");
-						SetWindowPos(pParams->hDeviceWindow, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOZORDER);
-						if (MQ_UnsupportedFullscreenInGame(WA.BB.Width, WA.BB.Height, DISP_CHANGE_BADMODE) == IDNO)
-							qFileLog("User desired to remain in full-screen. Returning error.");
-						else
-						{
-							qFileLog("Switch to windowed mode confirmed, proceeding.");
-							InGameHandled = 0, Settings.IG.Fullscreen = 0;
-							Env.Queue.ResetFullscreenInGame = 1;
-							goto SetWindowedMode;
-						}
-					}
-					else
-					{
-						qFileLog("Automatically switching to Windowed In-Game.");
-						InGameHandled = 0, Settings.IG.Fullscreen = 0;
-						Env.Queue.ResetFullscreenInGame = 1;
-						goto SetWindowedMode;
-					}
+					qFileLog("Automatically switching to Windowed In-Game.");
+					InGameHandled = 0, Settings.IG.Fullscreen = 0;
+					Env.Queue.ResetFullscreenInGame = 1;
+					goto SetWindowedMode;
 				}
 			}
 			else if (check == D3D_OK)

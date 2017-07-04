@@ -15,4 +15,3 @@ void M_RecommendHardwareCursorsDisable();
 void M_SetMultiMonResLight(int, int);
 void M_LowBPP(UINT);
 void M_UnsupportedFullscreenFrontend(int, int, LONG);
-int MQ_UnsupportedFullscreenInGame(int, int, LONG);
