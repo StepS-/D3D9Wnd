@@ -11,3 +11,4 @@
 *.opensdf
 *.VC.opendb
 /bin
+/.vs
