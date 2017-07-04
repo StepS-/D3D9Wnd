@@ -162,6 +162,7 @@ struct D3D9wnd_environment{
 			VirtY;
 	} Act;
 	struct WaitFlags{
+		BOOL ResetFullscreenInGame;
 		BOOL NeedsCentering;
 	} Queue;
 	struct EasterEggData{

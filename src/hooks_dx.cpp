@@ -24,6 +24,8 @@ IUNKNOWN_RELEASE D3D9ReleaseNext;
 DSOUNDCREATE DSoundCreateNext;
 DSOUND_CREATESOUNDBUFFER DSoundCreateSoundBufferNext;
 
+BOOL InGameHandled = 0;
+
 ULONG WINAPI D3D9ReleaseHook(IUnknown* pthis)
 {
 	ULONG result = D3D9ReleaseNext(pthis);
@@ -216,20 +218,48 @@ HRESULT WINAPI D3D9CreateDeviceHook(IDirect3D9 *pthis, UINT Adapter, D3DDEVTYPE 
 	}
 	else if (result == D3DERR_INVALIDCALL)
 	{
-		if (Settings.FR.Fullscreen && !Settings.FR.AltFullscreen && !InGame())
+		if ((!InGame() && Settings.FR.Fullscreen && !Settings.FR.AltFullscreen) || (InGame() && Settings.IG.Fullscreen))
 		{
-			qFileLog("ERROR: D3DERR_INVALIDCALL when creating the device. Fullscreen mode is on. Checking whether the requested screen resolution is unsupported.");
+			qFileLog("ERROR: D3DERR_INVALIDCALL when creating the device. Fullscreen mode is on. Checking whether the requested screen resolution is supported.");
 
 			HRESULT check = d3d9.CheckFullscreenMode(Adapter, pParams);
 			if (check == D3DERR_NOTAVAILABLE)
 			{
-				qFileLog("End of test: the requested fullscreen mode is NOT supported by the adapter. Switching to windowed mode and notifying the user.");
+				qFileLog("End of test: the requested fullscreen mode is NOT supported by the adapter.");
 
-				WritePrivateProfileInt("FrontendSettings", "Fullscreen", Settings.FR.Fullscreen = false, Config);
-				WritePrivateProfileInt("FrontendSettings", "FullscreenAlternative", Settings.FR.AltFullscreen = false, Config);
-				SetWindowPos(pParams->hDeviceWindow, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOZORDER);
-				M_UnsupportedFullscreen(WA.BB.Width, WA.BB.Height, DISP_CHANGE_BADMODE);
-				goto SetWindowedMode;
+				if (!InGame())
+				{
+					WritePrivateProfileInt("FrontendSettings", "Fullscreen", Settings.FR.Fullscreen = false, Config);
+					WritePrivateProfileInt("FrontendSettings", "FullscreenAlternative", Settings.FR.AltFullscreen = false, Config);
+					SetWindowPos(pParams->hDeviceWindow, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOZORDER);
+					qFileLog("Letting the user know that Windowed Mode is going to be enabled in the Frontend.");
+					M_UnsupportedFullscreenFrontend(WA.BB.Width, WA.BB.Height, DISP_CHANGE_BADMODE);
+					goto SetWindowedMode;
+				}
+				else
+				{
+					if (!Settings.FR.Fullscreen)
+					{
+						qFileLog("Asking the user whether to switch to Windowed In-Game.");
+						SetWindowPos(pParams->hDeviceWindow, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOZORDER);
+						if (MQ_UnsupportedFullscreenInGame(WA.BB.Width, WA.BB.Height, DISP_CHANGE_BADMODE) == IDNO)
+							qFileLog("User desired to remain in full-screen. Returning error.");
+						else
+						{
+							qFileLog("Switch to windowed mode confirmed, proceeding.");
+							InGameHandled = 0, Settings.IG.Fullscreen = 0;
+							Env.Queue.ResetFullscreenInGame = 1;
+							goto SetWindowedMode;
+						}
+					}
+					else
+					{
+						qFileLog("Automatically switching to Windowed In-Game.");
+						InGameHandled = 0, Settings.IG.Fullscreen = 0;
+						Env.Queue.ResetFullscreenInGame = 1;
+						goto SetWindowedMode;
+					}
+				}
 			}
 			else if (check == D3D_OK)
 				qFileLog("Test passed: the requested fullscreen mode is supported. The issue is in something else. It's possible that the device cannot be created at this time. Returning error.");
@@ -266,7 +296,6 @@ IDirect3D9* WINAPI Direct3DCreate9Hook(UINT SDKVersion)
 	return result;
 }
 
-BOOL InGameHandled = 0;
 BOOL __stdcall SetWndParam(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags)
 {
 	fFileLog("SetWndParam has been called with parameters 0x%X, 0x%X, %d, %d, %d, %d, 0x%X.", hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
@@ -389,6 +418,12 @@ BOOL __stdcall SetWndParam(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx
 			if (Settings.Misc.FancyStartup && !Settings.FR.AltFullscreen && !Settings.FR.Fullscreen)
 				FancyUpdate();
 
+			if (Env.Queue.ResetFullscreenInGame)
+			{
+				Settings.IG.Fullscreen = 1;
+				Env.Queue.ResetFullscreenInGame = 0;
+			}
+
 			if (InGameHandled)
 			{
 				qFileLog("SetWndParam: This is a return to frontend after the match.");
@@ -421,7 +456,7 @@ BOOL __stdcall SetWndParam(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx
 					WritePrivateProfileInt("FrontendSettings", "Fullscreen", Settings.FR.Fullscreen = false, Config);
 					WritePrivateProfileInt("FrontendSettings", "FullscreenAlternative", Settings.FR.AltFullscreen = false, Config);
 					SetWindowText(WA.Wnd.DX, "Worms Armageddon (windowed)");
-					M_UnsupportedFullscreen(WA.BB.Width, WA.BB.Height, dispChange);
+					M_UnsupportedFullscreenFrontend(WA.BB.Width, WA.BB.Height, dispChange);
 				}
 				else
 				{

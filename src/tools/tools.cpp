@@ -477,8 +477,9 @@ int Mprintf(UINT uType, LPCSTR lpCaption, LPCSTR Format, ...)
 	char buf[2048];
 	result = vsprintf_s(buf, Format, args);
 	va_end(args);
-	if (result)
-		MessageBoxA(0, buf, lpCaption, uType);
+	if (result >= 0)
+		result = MessageBoxA(0, buf, lpCaption, uType);
+	// If a vsprintf error occurs, the vsprintf error code (<0) is returned. Otherwise, one of the MessageBoxA codes (>=0)
 	return result;
 }
 
