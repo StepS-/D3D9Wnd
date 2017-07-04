@@ -330,8 +330,6 @@ void LoadConfig()
 	Settings.FR.Stretch = GetPrivateProfileInt("FrontendSettings", "Stretch", 0, Config);
 	Settings.FR.Centered = GetPrivateProfileInt("FrontendSettings", "Centered", 0, Config);
 	Settings.FR.ArbitrarySizing = GetPrivateProfileInt("FrontendSettings", "EnableCustomSize", 0, Config);
-	Settings.FR.Xsize = GetPrivateProfileInt("FrontendSettings", "Xsize", 640, Config);
-	Settings.FR.Ysize = GetPrivateProfileInt("FrontendSettings", "Ysize", 480, Config);
 
 	Settings.IG.Fullscreen = GetPrivateProfileInt("InGameSettings", "Fullscreen", 0, Config);
 	Settings.IG.WindowBorder = GetPrivateProfileInt("InGameSettings", "WindowBorder", 1, Config);
@@ -377,6 +375,13 @@ void LoadConfig()
 			M_RecommendHardwareCursorsDisable();
 			WriteWARegOptionDword("UseHardwareCursors", 0); //in case registry isn't used, prevent second appearance of the notification
 		}
+	}
+
+	if (Settings.FR.ArbitrarySizing)
+	{
+		qFileLog("EnableCustomSize is enabled, but is no longer available. Notifying the user.");
+		Settings.FR.ArbitrarySizing = 0;
+		M_GoodbyeCustomSize();
 	}
 
 	if (Settings.FR.Background && !Settings.FR.Fullscreen && !Settings.FR.AltFullscreen)
