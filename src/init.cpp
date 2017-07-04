@@ -283,6 +283,15 @@ void GetMultiMonitorConfig()
 			qFileLog("Set the in-game screen resolution to the total of all of the monitors' resolutions.");
 		}
 	}
+
+	if (Settings.MM.Enable)
+	{
+		if (Settings.IG.Fullscreen)
+		{
+			Settings.IG.Fullscreen = 0;
+			qFileLog("Note: In-Game Fullscreen has been disabled for Multi-Monitors.");
+		}
+	}
 }
 
 void LoadConfig()
