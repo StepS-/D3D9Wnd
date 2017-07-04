@@ -187,6 +187,7 @@ extern D3D9wnd_environment Env;
 extern D3D9Info d3d9;
 
 BOOL UpdateWACaption();
+BOOL ReleaseAllPressedKeys();
 BOOL MinimizeWA();
 BOOL ClipCursorInFrontend();
 BOOL ChangeTopmostState();

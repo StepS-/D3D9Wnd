@@ -32,6 +32,21 @@ BOOL UpdateWACaption()
 	return 0;
 }
 
+BOOL ReleaseAllPressedKeys()
+{
+	BYTE keyboard[256];
+	BOOL result = GetKeyboardState(keyboard);
+	if (result)
+	{
+		for (int i = 0; i < 256; i++)
+		{
+			if (keyboard[i] & 0x80)
+				SendMessage(WA.Wnd.W2D, WM_KEYUP, i, 0);
+		}
+	}
+	return result;
+}
+
 BOOL MinimizeWA()
 {
 	if (!IsWindowEnabled(WA.Wnd.DX)) EnableWindow(WA.Wnd.DX, 1);

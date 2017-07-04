@@ -197,11 +197,8 @@ LRESULT CALLBACK CallWndProc(int nCode, WPARAM wParam, LPARAM lParam)
 						UpdateWACaption();
 					}
 
-					if (pwp->wParam)
-					{
-						SendMessage(WA.Wnd.W2D, WM_KEYUP, VK_MENU, 0); //Workaround: send WM_KEYUP to Alt.
-					//	SetCursorPos(WA.BB.Width / 2, WA.BB.Height / 2); //Seems to be fixed as of 3.7.2.47, so this is unneeded and causes a focus loss after unminimizing for the first time
-					}
+					if (!pwp->wParam)
+						ReleaseAllPressedKeys();
 				}
 				else if (Settings.FR.AltFullscreen)
 				{
