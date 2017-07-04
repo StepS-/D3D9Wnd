@@ -1,4 +1,5 @@
 
+#include <ddraw.h>
 #include "hooks_dx.h"
 #include "MinHook\MinHook.h"
 #include "tools\tools.h"
@@ -10,8 +11,8 @@
 ULONG PIPI, PIGI;
 #endif
 
-//HRESULT(WINAPI *DirectDrawCreateNext)(GUID*, LPDIRECTDRAW*, IUnknown*);
-//HRESULT(WINAPI *DirectDrawCreateExNext)(GUID*, LPDIRECTDRAW*, REFIID, IUnknown*);
+HRESULT(WINAPI *DirectDrawCreateNext)(GUID*, LPDIRECTDRAW*, IUnknown*);
+HRESULT(WINAPI *DirectDrawCreateExNext)(GUID*, LPDIRECTDRAW*, REFIID, IUnknown*);
 //FARPROC (WINAPI *GetProcAddressNext)(HMODULE, LPCSTR);
 
 D3D9CREATE Direct3DCreate9Next;
@@ -25,6 +26,27 @@ DSOUNDCREATE DSoundCreateNext;
 DSOUND_CREATESOUNDBUFFER DSoundCreateSoundBufferNext;
 
 BOOL InGameHandled = 0;
+
+HRESULT WINAPI DirectDrawCreateHook(GUID* lpGUID, LPDIRECTDRAW* lplpDD, IUnknown* pUnkOuter)
+{
+	if (!Env.DDraw)
+	{
+		Env.DDraw = true;
+		qFileLog("DirectDrawCreate called. The game is run in 8/32-bit DirectDraw mode. Warning the user and suspending.");
+		M_D3D9Disabled();
+	}
+	return DirectDrawCreateNext(lpGUID, lplpDD, pUnkOuter);
+}
+HRESULT WINAPI DirectDrawCreateExHook(GUID* lpGuid, LPDIRECTDRAW* lplpDD, REFIID iid, IUnknown* pUnkOuter)
+{
+	if (!Env.DDraw)
+	{
+		Env.DDraw = true;
+		qFileLog("DirectDrawCreateEx called. The game is run in Direct3D 7 mode. Warning the user and suspending.");
+		M_D3D9Disabled();
+	}
+	return DirectDrawCreateExNext(lpGuid, lplpDD, iid, pUnkOuter);
+}
 
 ULONG WINAPI D3D9ReleaseHook(IUnknown* pthis)
 {

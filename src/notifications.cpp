@@ -23,7 +23,7 @@ void M_D3D9Disabled()
 {
 	if (GameLanguage("Russian")) MessageBox(0, "Пожалуйста, включите один из вариантов Direct3D 9 через меню Дополнительных настроек игры, либо активировав соответствующий скрипт реестра из папки \"Tweaks\". Сейчас модуль прекратит свою работу.", "Ошибка модуля D3D9Wnd", MB_OK | MB_ICONERROR);
 	else if (GameLanguage("Italian")) MessageBox(0, "Per favore abilita uno dei renderer Direct3D 9 in Advanced Settings oppure utilizzando i corrispettivi files presenti nella cartella \"Tweaks\".", "Errore D3D9Wnd", MB_OK | MB_ICONERROR);
-	else ErrorBox("Please enable one of the Direct3D 9 renderers either in the Advanced Settings or by using the corresponding files from \"Tweaks\" folder. I will exit now.", "D3D9Wnd error");
+	else ErrorBox("Please enable one of the Direct3D 9 renderers either in Advanced Settings or by using the corresponding files from the \"Tweaks\" folder. I will exit now.", "D3D9Wnd error");
 }
 
 void M_TooOld()

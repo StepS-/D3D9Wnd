@@ -111,8 +111,26 @@ BOOL InitializeD3D9Wnd()
 			return 0;
 		}
 
-		//MH_CreateHook(&DirectDrawCreate, DirectDrawCreateHook, (PVOID*)&DirectDrawCreateNext);
-		//MH_CreateHook(&DirectDrawCreateEx, DirectDrawCreateExHook, (PVOID*)&DirectDrawCreateExNext);
+		FARPROC DDCreate = 0, DDCreateEx = 0;
+		if ((ddraw.dll = LoadLibrary("ddraw.dll")) != 0)
+		{
+			qFileLog("Successfully loaded the ddraw.dll library. Installing hooks.");
+			if ((DDCreate   = GetProcAddress(ddraw.dll, "DirectDrawCreate")) != 0 ||
+			    (DDCreateEx = GetProcAddress(ddraw.dll, "DirectDrawCreateEx")) != 0)
+			{
+				MH_CreateHook(DDCreate, DirectDrawCreateHook, (PVOID*)&DirectDrawCreateNext);
+				MH_CreateHook(DDCreateEx, DirectDrawCreateExHook, (PVOID*)&DirectDrawCreateExNext);
+
+				if (MH_EnableHook(DDCreate) != MH_OK)
+					qFileLog("Failed to hook DirectDrawCreate.");
+				if (MH_EnableHook(DDCreateEx) != MH_OK)
+					qFileLog("Failed to hook DirectDrawCreateEx.");
+			}
+			else
+				fFileLog("Failed GetProcAddress for DirectDrawCreate(Ex)... Is this a hacked ddraw.dll? Error 0x%X.", GetLastError());
+		}
+		else
+			fFileLog("Failed to load the ddraw.dll library for whatever reason. Actually, here: 0x%X.", GetLastError());
 
 		switch (WA.Version)
 		{

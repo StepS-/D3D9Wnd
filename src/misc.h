@@ -65,6 +65,10 @@ struct DSound_stuff{
 	IDirectSound* obj;
 };
 
+struct DDraw_stuff {
+	HMODULE dll;
+};
+
 struct D3D9Wnd_settings{
 	struct{
 		BOOL
@@ -142,7 +146,7 @@ struct Memory_addresses{
 };
 
 struct D3D9wnd_environment{
-	BOOL Light, FrontInit;
+	BOOL Light, FrontInit, DDraw;
 	struct SysValues{
 		INT32
 			VirtResX,
@@ -182,6 +186,7 @@ extern D3D9Wnd_settings Settings;
 extern WA_info WA;
 extern Memory_addresses Offsets;
 extern DSound_stuff dsound;
+extern DDraw_stuff ddraw;
 extern D3D9wnd_environment Env;
 
 extern D3D9Info d3d9;

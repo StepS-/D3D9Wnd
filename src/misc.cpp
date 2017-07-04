@@ -12,6 +12,7 @@ BYTE eCI = 0;
 
 D3D9Info d3d9;
 DSound_stuff dsound;
+DDraw_stuff ddraw;
 D3D9Wnd_settings Settings;
 WA_info WA;
 Memory_addresses Offsets;

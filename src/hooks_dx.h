@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include <d3d9.h>
 #include <dsound.h>
+#include <ddraw.h>
 
 typedef IDirect3D9*(WINAPI *D3D9CREATE)(UINT);
 typedef HRESULT(WINAPI *D3D9_CREATEDEVICE)(IDirect3D9*, UINT, D3DDEVTYPE, HWND, DWORD, D3DPRESENT_PARAMETERS*, IDirect3DDevice9**);
@@ -14,6 +15,9 @@ typedef ULONG(WINAPI *IUNKNOWN_RELEASE)(IUnknown*);
 typedef HRESULT(WINAPI *DSOUNDCREATE)(LPCGUID, LPDIRECTSOUND*, LPUNKNOWN);
 typedef HRESULT(WINAPI *DSOUND_CREATESOUNDBUFFER)(IDirectSound*, LPCDSBUFFERDESC, LPDIRECTSOUNDBUFFER*, LPUNKNOWN);
 
+extern HRESULT(WINAPI *DirectDrawCreateNext)(GUID*, LPDIRECTDRAW*, IUnknown*);
+extern HRESULT(WINAPI *DirectDrawCreateExNext)(GUID*, LPDIRECTDRAW*, REFIID, IUnknown*);
+
 extern D3D9CREATE Direct3DCreate9Next;
 extern D3D9_CREATEDEVICE D3D9CreateDeviceNext;
 extern D3D9DEVICE_PRESENT D3D9PresentNext;
@@ -24,6 +28,8 @@ extern IUNKNOWN_RELEASE D3D9ReleaseNext;
 extern DSOUNDCREATE DSoundCreateNext;
 extern DSOUND_CREATESOUNDBUFFER DSoundCreateSoundBufferNext;
 
+HRESULT WINAPI DirectDrawCreateHook(GUID* lpGUID, LPDIRECTDRAW* lplpDD, IUnknown* pUnkOuter);
+HRESULT WINAPI DirectDrawCreateExHook(GUID* lpGuid, LPDIRECTDRAW* lplpDD, REFIID iid, IUnknown* pUnkOuter);
 HRESULT WINAPI D3D9ResetHook(IDirect3DDevice9* pthis, D3DPRESENT_PARAMETERS *pParams);
 ULONG WINAPI D3D9ReleaseHook(IUnknown* pthis);
 HRESULT WINAPI D3D9GetRasterStatusHook(IDirect3DDevice9 *pthis, UINT iSwapChain, D3DRASTER_STATUS *pRasterStatus);
