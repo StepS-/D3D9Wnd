@@ -40,8 +40,8 @@ BOOL InitializeD3D9Wnd()
 
 	if (WA.Version < QV(3,7,2,48))
 	{
-		if (!EnableDPIAwareness())     qFileLog("The game's process doesn't need to be set DPI-aware.");
-		else                           qFileLog("The game's process has been made DPI-aware.");
+		Env.Sys.DpiAwareness = MakeProcessDPIAware(TRUE);
+		fFileLog("The game's process currently has DPI awareness Level %d.", Env.Sys.DpiAwareness);
 
 		if (LoadLibrary("wkWndMode.dll"))
 		{

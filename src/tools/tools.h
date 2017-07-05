@@ -4,7 +4,6 @@
 
 #include <Windows.h>
 #include <stdio.h>
-#include <type_traits>
 
 #ifdef VISTAUP
 #include <dwmapi.h>
@@ -107,7 +106,8 @@ int Mprintf(UINT uType, LPCSTR lpCaption, LPCSTR Format, ...);
 
 QWORD GetModuleVersion(HMODULE hModule = NULL);
 BOOL DWMEnabled();
-BOOL EnableDPIAwareness();
+int MakeProcessDPIAware(BOOL PerMonitor = TRUE);
+
 BOOL WritePrivateProfileIntA(LPCSTR, LPCSTR, int, LPCSTR);
 BOOL WritePrivateProfileIntW(LPCWSTR, LPCWSTR, int, LPCWSTR);
 DOUBLE GetPrivateProfileDoubleA(LPCSTR, LPCSTR, DOUBLE, LPCSTR);

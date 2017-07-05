@@ -45,25 +45,55 @@ BOOL DWMEnabled()
 	return result;
 }
 
-BOOL EnableDPIAwareness()
+int MakeProcessDPIAware(BOOL PerMonitor)
 {
-	BOOL result = 0;
-#ifdef VISTAUP
-	if (!IsProcessDPIAware())
-		result = SetProcessDPIAware();
-#else
-	HMODULE hUser32 = LoadLibrary("user32.dll");
-	FARPROC isDPIAware = GetProcAddress(hUser32, "IsProcessDPIAware");
-	if (isDPIAware)
+	int result = 0;
+	HMODULE hShcore = LoadLibrary("Shcore.dll");
+	if (hShcore) //Win8.1 and newer go here! Optional PerMonitor awareness is possible
 	{
-		if (!isDPIAware())
+		HRESULT(WINAPI *_GetProcessDpiAwareness)(HANDLE, int*) = (HRESULT(WINAPI *)(HANDLE, int*))GetProcAddress(hShcore, "GetProcessDpiAwareness");
+		if (_GetProcessDpiAwareness)
 		{
-			FARPROC setDPIAware = GetProcAddress(hUser32, "SetProcessDPIAware");
-			if (setDPIAware) result = setDPIAware();
+			int aware = 0;
+			HRESULT dpiresult = _GetProcessDpiAwareness(NULL, &aware);
+			if (dpiresult == S_OK)
+			{
+				if (!aware)
+				{
+					HRESULT(WINAPI *_SetProcessDPIAwareness)(int) = (HRESULT(WINAPI *)(int))GetProcAddress(hShcore, "SetProcessDpiAwareness");
+					if (_SetProcessDPIAwareness)
+					{
+						dpiresult = _SetProcessDPIAwareness(PerMonitor ? 2 : 1);
+						if (dpiresult == S_OK)
+							result = PerMonitor ? 2 : 1;
+					}
+				}
+				else
+					result = aware; //can be 1 or 2+. NOTE: Cannot upgrade from 1 to 2 (will throw E_ACCESSDENIED)
+			}
+		}
+		FreeLibrary(hShcore);
+	}
+	if (!result) //Fallback for Win8 and older: System DPI-Aware
+	{
+		HMODULE hUser32 = LoadLibrary("user32.dll");
+		if (hUser32)
+		{
+			FARPROC isDPIAware = GetProcAddress(hUser32, "IsProcessDPIAware");
+			if (isDPIAware)
+			{
+				if (!isDPIAware())
+				{
+					FARPROC setDPIAware = GetProcAddress(hUser32, "SetProcessDPIAware");
+					if (setDPIAware)
+						result = setDPIAware();
+				}
+				else
+					result = 1;
+			}
+			FreeLibrary(hUser32);
 		}
 	}
-	FreeLibrary(hUser32);
-#endif
 	return result;
 }
 

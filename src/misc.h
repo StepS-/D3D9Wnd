@@ -156,7 +156,8 @@ struct D3D9wnd_environment{
 			PrimResX,
 			PrimResY,
 			BPP,
-			Monitors;
+			Monitors,
+			DpiAwareness;
 	} Sys;
 	struct CustomValues{
 		INT32
