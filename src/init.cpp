@@ -357,6 +357,13 @@ void LoadConfig()
 		Settings.IG.AutoUnpin = 0;
 	}
 
+	if (Settings.FR.ArbitrarySizing && !Settings.FR.ArbitrarySizingNecessary)
+	{
+		qFileLog("EnableCustomSize is enabled, but is no longer available. Notifying the user.");
+		Settings.FR.ArbitrarySizing = 0;
+		M_GoodbyeCustomSize();
+	}
+
 	GetMultiMonitorConfig();
 
 	qFileLog("Loaded all settings from the INI file.");
@@ -378,13 +385,6 @@ void LoadConfig()
 			M_RecommendHardwareCursorsDisable();
 			WriteWARegOptionDword("UseHardwareCursors", 0); //in case registry isn't used, prevent second appearance of the notification
 		}
-	}
-
-	if (Settings.FR.ArbitrarySizing && !Settings.FR.ArbitrarySizingNecessary)
-	{
-		qFileLog("EnableCustomSize is enabled, but is no longer available. Notifying the user.");
-		Settings.FR.ArbitrarySizing = 0;
-		M_GoodbyeCustomSize();
 	}
 
 	if (Settings.FR.Background && !Settings.FR.Fullscreen && !Settings.FR.AltFullscreen)
