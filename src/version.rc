@@ -1,7 +1,7 @@
 
 1 VERSIONINFO
- FILEVERSION 0,6,8,0
- PRODUCTVERSION 0,6,8,0
+ FILEVERSION 0,7,0,0
+ PRODUCTVERSION 0,7,0,0
  FILEOS 0x4L
  FILETYPE 0x2L
 BEGIN
@@ -16,11 +16,11 @@ BEGIN
 			VALUE "FileDescription", "A windowed mode based on W:A 3.7+ D3D9 renderer."
 			VALUE "ProductName", "wkD3D9Wnd"
 #endif
-            VALUE "FileVersion", "0.6.8.0"
+            VALUE "FileVersion", "0.7.0.0"
             VALUE "LegalCopyright", "(C) StepS, Kawoosh"
             VALUE "OriginalFilename", "wkD3D9Wnd.dll"
 			VALUE "InternalName", "wkD3D9Wnd"
-            VALUE "ProductVersion", "0.6.8.0"
+            VALUE "ProductVersion", "0.7.0.0"
         END
     END
     BLOCK "VarFileInfo"
