@@ -2,6 +2,8 @@
 
 #include <Windows.h>
 
+HWND WINAPI CreateDialogIndirectParamANew(HINSTANCE hInstance, LPCDLGTEMPLATEA lpTemplate, HWND hWndParent,
+	DLGPROC lpDialogFunc, LPARAM dwInitParam);
 HWND WINAPI CreateWindowExANew(DWORD dwExStyle, LPCTSTR lpClassName, LPCTSTR lpWindowName, DWORD dwStyle, int x, int y,
 	int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam);
 BOOL WINAPI SetForegroundWindowNew(HWND hWnd);

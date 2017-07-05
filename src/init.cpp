@@ -488,6 +488,10 @@ BOOL __stdcall InstallHooks()
 			else qFileLog("InstallHooks: Successfully hooked SetForegroundWindow.");
 		}
 
+		if (MH_CreateHook(&CreateDialogIndirectParamA, CreateDialogIndirectParamANew, (PVOID*)&CreateDialogIndirectParamANext) != MH_OK)
+			qFileLog("InstallHooks: FAILED to hook CreateDialogIndirectParamA!");
+		else
+			qFileLog("InstallHooks: Successfully hooked CreateDialogIndirectParamA.");
 		if (MH_CreateHook(&CreateWindowExA, CreateWindowExANew, (PVOID*)&CreateWindowExANext) != MH_OK)
 			qFileLog("InstallHooks: FAILED to hook CreateWindowExA!");
 		else

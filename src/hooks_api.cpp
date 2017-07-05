@@ -4,12 +4,33 @@
 #include "misc.h"
 #include "notifications.h"
 
+HWND(WINAPI *CreateDialogIndirectParamANext)(HINSTANCE, LPCDLGTEMPLATEA, HWND, DLGPROC, LPARAM);
 HWND(WINAPI *CreateWindowExANext)(DWORD, LPCTSTR, LPCTSTR, DWORD, int, int, int, int, HWND, HMENU, HINSTANCE, LPVOID);
 BOOL(WINAPI *SetForegroundWindowNext)(HWND);
 BOOL(WINAPI *IsIconicNext)(HWND);
 BOOL(WINAPI *SetCursorPosNext)(int, int);
 BOOL(WINAPI *MoveWindowNext)(HWND, int, int, int, int, BOOL);
 BOOL(WINAPI *SetWindowPosNext)(HWND, HWND, int, int, int, int, UINT);
+
+HWND WINAPI CreateDialogIndirectParamANew(HINSTANCE hInstance, LPCDLGTEMPLATEA lpTemplate, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam)
+{
+	HWND Wnd = CreateDialogIndirectParamANext(hInstance, lpTemplate, hWndParent, lpDialogFunc, dwInitParam);
+	if (hWndParent == WA.Wnd.DX)
+	{
+		qFileLog("WindowProc: A generic frontend MFC dialog screen has been entered.");
+
+		Env.EasterEgg.FrontendHidden = false;
+		WA.Wnd.MFC = Wnd;
+		GetWindowRect(Wnd, &WA.Rect.MFC);
+
+		if (WA.Version < QV(3,7,2,46) && (!Settings.FR.Fullscreen && !Settings.FR.AltFullscreen && !Settings.MM.Enable
+			&& (Settings.FR.Stretch || Settings.FR.ArbitrarySizing || Settings.FR.Centered)))
+		{
+			ClipCursorInFrontend();
+		}
+	}
+	return Wnd;
+}
 
 BOOL WINAPI SetWindowPosNew(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags)
 {

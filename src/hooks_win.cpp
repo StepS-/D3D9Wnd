@@ -213,6 +213,14 @@ LRESULT CALLBACK CallWndProc(int nCode, WPARAM wParam, LPARAM lParam)
 						qFileLog("WindowProc: Regained focus in artificial fullscreen frontend and changed the screen resolution back to frontend resolution.");
 					}
 				}
+				else if (!Settings.FR.Fullscreen && (Settings.FR.Centered || Settings.FR.Stretch))
+				{
+					if (pwp->wParam)
+					{
+						if (ClipCursorInFrontend())
+							qFileLog("WindowProc: Regained focus in Stretched/Centered frontend and re-clipped the cursor.");
+					}
+				}
 				break;
 
 			case WM_SETCURSOR:
@@ -240,21 +248,6 @@ LRESULT CALLBACK CallWndProc(int nCode, WPARAM wParam, LPARAM lParam)
 				//GDI layer workaround: prevent white mess on focus loss and maximization in frontend screens.
 
 				qFileLog("WindowProc: Applied the transparency layer to the new MFC dialog and enabled the DX window.");
-			}
-
-			if (GetWindow(pwp->hwnd, GW_OWNER) == WA.Wnd.DX)
-			{
-				qFileLog("WindowProc: A generic frontend MFC dialog screen has been entered.");
-
-				Env.EasterEgg.FrontendHidden = false;
-				WA.Wnd.MFC = pwp->hwnd;
-				GetWindowRect(pwp->hwnd, &WA.Rect.MFC);
-
-				if (WA.Version < QV(3,7,2,46) && (!Settings.FR.Fullscreen && !Settings.FR.AltFullscreen && !Settings.MM.Enable
-					&& (Settings.FR.Stretch || Settings.FR.ArbitrarySizing || Settings.FR.Centered)))
-				{
-					ClipCursorInFrontend();
-				}
 			}
 		}
 	}
