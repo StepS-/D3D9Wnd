@@ -576,6 +576,7 @@ BOOL __stdcall UninstallHooks()
 		D3D9PresentNext = 0;
 		D3D9CreateDeviceNext = 0;
 #ifndef VISTAUP
+		if (ddraw.dll) { FreeLibrary(ddraw.dll); ddraw.dll = 0; }
 		if (d3d9.dll) { FreeLibrary(d3d9.dll); d3d9.dll = 0; }
 		if (dsound.dll) { FreeLibrary(dsound.dll); dsound.dll = 0; }
 #endif
