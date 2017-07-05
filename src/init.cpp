@@ -330,6 +330,9 @@ void LoadConfig()
 	Settings.FR.Stretch = GetPrivateProfileInt("FrontendSettings", "Stretch", 0, Config);
 	Settings.FR.Centered = GetPrivateProfileInt("FrontendSettings", "Centered", 0, Config);
 	Settings.FR.ArbitrarySizing = GetPrivateProfileInt("FrontendSettings", "EnableCustomSize", 0, Config);
+	Settings.FR.ArbitrarySizingNecessary = GetPrivateProfileInt("FrontendSettings", "YesIDesperatelyNeedCustomSize", 0, Config);
+	Settings.FR.Xsize = GetPrivateProfileInt("FrontendSettings", "Xsize", 640, Config);
+	Settings.FR.Ysize = GetPrivateProfileInt("FrontendSettings", "Ysize", 480, Config);
 
 	Settings.IG.Fullscreen = GetPrivateProfileInt("InGameSettings", "Fullscreen", 0, Config);
 	Settings.IG.WindowBorder = GetPrivateProfileInt("InGameSettings", "WindowBorder", 1, Config);
@@ -377,7 +380,7 @@ void LoadConfig()
 		}
 	}
 
-	if (Settings.FR.ArbitrarySizing)
+	if (Settings.FR.ArbitrarySizing && !Settings.FR.ArbitrarySizingNecessary)
 	{
 		qFileLog("EnableCustomSize is enabled, but is no longer available. Notifying the user.");
 		Settings.FR.ArbitrarySizing = 0;

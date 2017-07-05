@@ -85,7 +85,8 @@ struct D3D9Wnd_settings{
 			Stretch,
 			Centered,
 			Background,
-			ArbitrarySizing;
+			ArbitrarySizing,
+			ArbitrarySizingNecessary;
 		INT32
 			Xsize,
 			Ysize;
