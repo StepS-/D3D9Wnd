@@ -11,6 +11,9 @@
 
 BOOL InitializeD3D9Wnd()
 {
+	if (CmdOption("/handlecrash")) // It is a handlecrash instance
+		return 1;
+
 	if (!LockCurrentInstance("D3D9Wnd"))
 		return 1;
 
