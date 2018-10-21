@@ -147,7 +147,7 @@ struct Memory_addresses{
 };
 
 struct D3D9wnd_environment{
-	BOOL Light, FrontInit, DDraw;
+	BOOL Light, FrontInit, DDraw, AVSAdjust;
 	struct SysValues{
 		INT32
 			VirtResX,

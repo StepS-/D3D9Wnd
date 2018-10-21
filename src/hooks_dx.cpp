@@ -83,7 +83,11 @@ HRESULT WINAPI D3D9GetRasterStatusHook(IDirect3DDevice9 *pthis, UINT iSwapChain,
 	#endif
 
 	HRESULT result = D3D9GetRasterStatusNext(pthis, iSwapChain, pRasterStatus);
-	pRasterStatus->ScanLine = (UINT)((DOUBLE)pRasterStatus->ScanLine * BufDif);
+	if (result != D3D_OK)
+		fFileLog("IDirect3DDevice9::GetRasterStatus returned error 0x%X!", result);
+	else
+		pRasterStatus->ScanLine = (UINT)((DOUBLE)pRasterStatus->ScanLine * BufDif);
+
 	return result;
 }
 
@@ -214,28 +218,29 @@ HRESULT WINAPI D3D9CreateDeviceHook(IDirect3D9 *pthis, UINT Adapter, D3DDEVTYPE 
 				qFileLog("FAILURE when trying to prepare the Present patch!");
 		}
 
-		if (!D3D9GetRasterStatusNext && (pParams->BackBufferHeight > (UINT)Env.Sys.PrimResY || pParams->BackBufferHeight < 120))
+		if (!Env.AVSAdjust && (pParams->BackBufferHeight > (UINT)Env.Sys.PrimResY || pParams->BackBufferHeight < 120))
 		{
 			BufDif = pParams->BackBufferHeight / (DOUBLE)Env.Sys.PrimResY;
 			MH_STATUS hookGRS = MH_CreateHook(d3d9.device.GetRasterStatus, D3D9GetRasterStatusHook, (PVOID*)&D3D9GetRasterStatusNext);
 			if (hookGRS == MH_OK || hookGRS == MH_ERROR_ALREADY_CREATED)
 			{
-				qFileLog("Successfully hooked IDirect3DDevice9::GetRasterStatus, required for the extra-tall backbuffer size.");
-				if (MH_EnableHook(d3d9.device.GetRasterStatus) != MH_OK)
-					qFileLog("FAILED to enable the IDirect3DDevice9::GetRasterStatus hook!");
+				fFileLog("Successfully hooked IDirect3DDevice9::GetRasterStatus, required for the extra-tall backbuffer size. MH Code: %d", hookGRS);
+				hookGRS = MH_EnableHook(d3d9.device.GetRasterStatus);
+				if (hookGRS == MH_OK || hookGRS == MH_ERROR_ENABLED)
+					Env.AVSAdjust = 1;
+				else
+					fFileLog("FAILED to enable the IDirect3DDevice9::GetRasterStatus hook! MH Error: %d", hookGRS);
 			}
 			else
 				qFileLog("FAILED to hook IDirect3DDevice9::GetRasterStatus, required for the extra-tall backbuffer size!");
 		}
-		else if (D3D9GetRasterStatusNext)
+		else if (Env.AVSAdjust)
 		{
 			if (MH_DisableHook(d3d9.device.GetRasterStatus) == MH_OK)
-			{
 				qFileLog("Successfully unhooked IDirect3DDevice9::GetRasterStatus.");
-				D3D9GetRasterStatusNext = 0;
-			}
 			else
 				qFileLog("FAILED to unhook IDirect3DDevice9::GetRasterStatus!");
+			Env.AVSAdjust = 0;
 		}
 	}
 	else if (result == D3DERR_INVALIDCALL)
