@@ -9,6 +9,8 @@
 #include "hooks_api.h"
 #include "hooks_dx.h"
 
+BOOL Hooked = 0, Initialized = 0;
+
 BOOL InitializeD3D9Wnd()
 {
 	if (CmdOption("/handlecrash")) // It is a handlecrash instance
@@ -20,6 +22,8 @@ BOOL InitializeD3D9Wnd()
 #ifdef LOGGING
 	LOG_FILE = CreateFile("d3d9wnd.log", GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 #endif
+
+	Initialized = 1;
 
 	qFileLog("DLL_PROCESS_ATTACH: Starting logging.");
 
@@ -202,9 +206,11 @@ BOOL InitializeD3D9Wnd()
 
 BOOL FinalizeD3D9Wnd()
 {
-	if (WA.Version < QV(3,7,2,38))
+	if (Initialized)
+	{
 		UninstallHooks();
-	qFileLog("DLL_PROCESS_DETACH: Bye bye!");
+		qFileLog("DLL_PROCESS_DETACH: Bye bye!");
+	}
 	return 1;
 }
 
@@ -462,7 +468,6 @@ void GetWALocale()
 		strcpy_s(walanguage, *(PCHAR*)Offsets.Language);
 }
 
-BOOL Hooked = 0;
 BOOL __stdcall InstallHooks()
 {
 	qFileLog("InstallHooks: Proceeding to installing the hooks.");
@@ -571,27 +576,32 @@ BOOL __stdcall UninstallHooks()
 {
 	qFileLog("UninstallHooks: Proceeding to uninstalling the hooks.");
 
-	if (MH_DisableHook(MH_ALL_HOOKS) == MH_OK)
+	if (Hooked)
 	{
-		UnhookWindowsHookEx(hkb);
-		UnhookWindowsHookEx(hkb2);
-		if (Settings.IG.AutoUnpin) UnhookWindowsHookEx(hkb3);
-		SetForegroundWindowNext = 0;
-		D3D9GetRasterStatusNext = 0;
-		D3D9ReleaseNext = 0;
-		D3D9PresentNext = 0;
-		D3D9CreateDeviceNext = 0;
+		if (MH_DisableHook(MH_ALL_HOOKS) == MH_OK)
+		{
+			UnhookWindowsHookEx(hkb);
+			UnhookWindowsHookEx(hkb2);
+			if (Settings.IG.AutoUnpin) UnhookWindowsHookEx(hkb3);
+			SetForegroundWindowNext = 0;
+			D3D9GetRasterStatusNext = 0;
+			D3D9ReleaseNext = 0;
+			D3D9PresentNext = 0;
+			D3D9CreateDeviceNext = 0;
 #ifndef VISTAUP
-		if (ddraw.dll) { FreeLibrary(ddraw.dll); ddraw.dll = 0; }
-		if (d3d9.dll) { FreeLibrary(d3d9.dll); d3d9.dll = 0; }
-		if (dsound.dll) { FreeLibrary(dsound.dll); dsound.dll = 0; }
+			if (ddraw.dll) { FreeLibrary(ddraw.dll); ddraw.dll = 0; }
+			if (d3d9.dll) { FreeLibrary(d3d9.dll); d3d9.dll = 0; }
+			if (dsound.dll) { FreeLibrary(dsound.dll); dsound.dll = 0; }
 #endif
-		Hooked = FALSE;
-		qFileLog("UninstallHooks: Successfully disabled all hooks.");
-		return 1;
+			Hooked = FALSE;
+			qFileLog("UninstallHooks: Successfully disabled all hooks.");
+			return 1;
+		}
+		else
+			qFileLog("UninstallHooks: FAILED to disable all hooks!");
 	}
 	else
-		qFileLog("UninstallHooks: FAILED to disable all hooks!");
+		qFileLog("UninstallHooks: Hooks were not installed.");
 	return 0;
 }
 
