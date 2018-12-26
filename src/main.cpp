@@ -4,8 +4,6 @@
 #include "MinHook\MinHook.h"
 #include "tools\tools.h"
 
-#pragma comment (lib, "MinHook\\libMinHook.x86.lib")
-
 HMODULE d3d9;
 IDirect3D9* (WINAPI *Direct3DCreate9Next)(UINT);
 HRESULT(WINAPI *D3D9CreateDeviceNext)(IDirect3D9*, UINT, D3DDEVTYPE, HWND, DWORD, D3DPRESENT_PARAMETERS*, IDirect3DDevice9**);
