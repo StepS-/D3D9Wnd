@@ -572,36 +572,23 @@ BOOL __stdcall InstallHooks()
 	return 0;
 }
 
-BOOL __stdcall UninstallHooks()
+void __stdcall UninstallHooks()
 {
 	qFileLog("UninstallHooks: Proceeding to uninstalling the hooks.");
-
-	if (Hooked)
-	{
-		if (MH_DisableHook(MH_ALL_HOOKS) == MH_OK)
-		{
-			UnhookWindowsHookEx(hkb);
-			UnhookWindowsHookEx(hkb2);
-			if (Settings.IG.AutoUnpin) UnhookWindowsHookEx(hkb3);
-			SetForegroundWindowNext = 0;
-			D3D9GetRasterStatusNext = 0;
-			D3D9ReleaseNext = 0;
-			D3D9PresentNext = 0;
-			D3D9CreateDeviceNext = 0;
+	MH_DisableHook(MH_ALL_HOOKS);
+	if (hkb) UnhookWindowsHookEx(hkb), hkb = 0;
+	if (hkb2) UnhookWindowsHookEx(hkb2), hkb2 = 0;
+	if (hkb3) UnhookWindowsHookEx(hkb3), hkb3 = 0;
+	SetForegroundWindowNext = 0;
+	D3D9GetRasterStatusNext = 0;
+	D3D9ReleaseNext = 0;
+	D3D9PresentNext = 0;
+	D3D9CreateDeviceNext = 0;
 #ifndef VISTAUP
-			if (ddraw.dll) { FreeLibrary(ddraw.dll); ddraw.dll = 0; }
-			if (d3d9.dll) { FreeLibrary(d3d9.dll); d3d9.dll = 0; }
-			if (dsound.dll) { FreeLibrary(dsound.dll); dsound.dll = 0; }
+	if (ddraw.dll) FreeLibrary(ddraw.dll), ddraw.dll = 0;
+	if (d3d9.dll) FreeLibrary(d3d9.dll), d3d9.dll = 0;
+	if (dsound.dll) FreeLibrary(dsound.dll), dsound.dll = 0;
 #endif
-			Hooked = FALSE;
-			qFileLog("UninstallHooks: Successfully disabled all hooks.");
-			return 1;
-		}
-		else
-			qFileLog("UninstallHooks: FAILED to disable all hooks!");
-	}
-	else
-		qFileLog("UninstallHooks: Hooks were not installed.");
-	return 0;
+	Hooked = FALSE;
+	qFileLog("UninstallHooks: Uninstallation complete.");
 }
-

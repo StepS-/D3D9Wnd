@@ -9,4 +9,4 @@ void WriteRunInBackground();
 void CheckStaticWindowClass();
 void GetWALocale();
 BOOL __stdcall InstallHooks();
-BOOL __stdcall UninstallHooks();
+void __stdcall UninstallHooks();
