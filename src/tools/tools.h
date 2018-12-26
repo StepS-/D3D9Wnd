@@ -48,10 +48,15 @@ extern "C" IMAGE_DOS_HEADER __ImageBase;
 #define WarningBoxA(Text, Caption) GenericBoxA(Text, Caption, MB_OK | MB_ICONWARNING)
 #define WarningBoxW(Text, Caption) GenericBoxW(Text, Caption, MB_OK | MB_ICONWARNING)
 
-int Mprintf(UINT uType, LPCSTR lpCaption, LPCSTR Format, ...);
-#define Mprintfi(Caption, Format, ...) Mprintf(MB_OK | MB_ICONINFORMATION, Caption, Format, __VA_ARGS__)
-#define Mprintfe(Caption, Format, ...) Mprintf(MB_OK | MB_ICONERROR, Caption, Format, __VA_ARGS__)
-#define Mprintfw(Caption, Format, ...) Mprintf(MB_OK | MB_ICONWARNING, Caption, Format, __VA_ARGS__)
+int MprintfA(UINT uType, LPCSTR lpCaption, LPCSTR Format, ...);
+int MprintfW(UINT uType, LPCWSTR lpCaption, LPCWSTR Format, ...);
+
+#define MprintfiA(Caption, Format, ...) MprintfA(MB_OK | MB_ICONINFORMATION, Caption, Format, __VA_ARGS__)
+#define MprintfiW(Caption, Format, ...) MprintfW(MB_OK | MB_ICONINFORMATION, Caption, Format, __VA_ARGS__)
+#define MprintfeA(Caption, Format, ...) MprintfA(MB_OK | MB_ICONERROR, Caption, Format, __VA_ARGS__)
+#define MprintfeW(Caption, Format, ...) MprintfW(MB_OK | MB_ICONERROR, Caption, Format, __VA_ARGS__)
+#define MprintfwA(Caption, Format, ...) MprintfA(MB_OK | MB_ICONWARNING, Caption, Format, __VA_ARGS__)
+#define MprintfwW(Caption, Format, ...) MprintfW(MB_OK | MB_ICONWARNING, Caption, Format, __VA_ARGS__)
 
 #define GetWARegOptionStringA(OptionName, OutBuf, BufSize, Default) GetRegistryStringA(HKEY_CURRENT_USER, "Software\\Team17SoftwareLTD\\WormsArmageddon\\Options\\", OptionName, OutBuf, BufSize, Default)
 #define GetWARegOptionStringW(OptionName, OutBuf, BufSize, Default) GetRegistryStringW(HKEY_CURRENT_USER, L"Software\\Team17SoftwareLTD\\WormsArmageddon\\Options\\", OptionName, OutBuf, BufSize, Default)
@@ -82,6 +87,10 @@ int Mprintf(UINT uType, LPCSTR lpCaption, LPCSTR Format, ...);
 #define DispChangeErrorStr DispChangeErrorStrW
 #define FileExists FileExistsW
 #define DirectoryExists DirectoryExistsW
+#define Mprintf MprintfW
+#define Mprintfi MprintfiW
+#define Mprintfe MprintfeW
+#define Mprintfw MprintfwW
 
 #else
 #define GetPathUnderModule GetPathUnderModuleA
@@ -102,6 +111,10 @@ int Mprintf(UINT uType, LPCSTR lpCaption, LPCSTR Format, ...);
 #define DispChangeErrorStr DispChangeErrorStrA
 #define FileExists FileExistsA
 #define DirectoryExists DirectoryExistsA
+#define Mprintf MprintfA
+#define Mprintfi MprintfiA
+#define Mprintfe MprintfeA
+#define Mprintfw MprintfwA
 #endif
 
 QWORD GetModuleVersion(HMODULE hModule = NULL);

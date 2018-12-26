@@ -499,17 +499,31 @@ LSTATUS WriteRegistryDwordW(HKEY hKey, LPCWSTR lpSubKey, LPCWSTR lpValueName, DW
 	return lResult;
 }
 
-int Mprintf(UINT uType, LPCSTR lpCaption, LPCSTR Format, ...)
+int MprintfA(UINT uType, LPCSTR lpCaption, LPCSTR Format, ...)
 {
 	int result = 0;
 	va_list args;
 	va_start(args, Format);
-	char buf[2048];
+	CHAR buf[2000];
 	result = vsprintf_s(buf, Format, args);
 	va_end(args);
 	if (result >= 0)
 		result = MessageBoxA(0, buf, lpCaption, uType);
 	// If a vsprintf error occurs, the vsprintf error code (<0) is returned. Otherwise, one of the MessageBoxA codes (>=0)
+	return result;
+}
+
+int MprintfW(UINT uType, LPCWSTR lpCaption, LPCWSTR Format, ...)
+{
+	int result = 0;
+	va_list args;
+	va_start(args, Format);
+	WCHAR buf[2000];
+	result = vswprintf_s(buf, Format, args);
+	va_end(args);
+	if (result >= 0)
+		result = MessageBoxW(0, buf, lpCaption, uType);
+	// If a vswprintf error occurs, the vswprintf error code (<0) is returned. Otherwise, one of the MessageBoxW codes (>=0)
 	return result;
 }
 

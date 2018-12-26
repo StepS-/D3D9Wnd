@@ -1,4 +1,4 @@
-
+п»ї
 #include "notifications.h"
 #include "tools\tools.h"
 char walanguage[32];
@@ -7,43 +7,43 @@ void M_TooSmallWidth(HWND hWnd)
 {
 	ClipCursor(NULL);
 	ShowWindow(hWnd, SW_MINIMIZE);
-	if (GameLanguage("Russian")) MessageBox(0, "Игра не может начаться, поскольку ширина экрана в заданном разрешении ниже 143. Пожалуйста, поменяйте её на приемлемое значение.", "Ошибка модуля D3D9Wnd", MB_OK | MB_ICONERROR);
-	else if (GameLanguage("Italian")) MessageBox(0, "Il gioco non puт avviarsi perchй la larghezza dello schermo settata и minore di 143. и necessario modificarla con un valore piщ appropriato.", "Errore D3D9Wnd", MB_OK | MB_ICONERROR);
-	else MessageBox(0, "The game cannot start because the specified screen width is lower than 143. Please change it to an appropriate value.", "D3D9Wnd error", MB_OK | MB_ICONERROR);
+	if (GameLanguage("Russian")) MessageBoxW(0, L"РРіСЂР° РЅРµ РјРѕР¶РµС‚ РЅР°С‡Р°С‚СЊСЃСЏ, РїРѕСЃРєРѕР»СЊРєСѓ С€РёСЂРёРЅР° СЌРєСЂР°РЅР° РІ Р·Р°РґР°РЅРЅРѕРј СЂР°Р·СЂРµС€РµРЅРёРё РЅРёР¶Рµ 143. РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РїРѕРјРµРЅСЏР№С‚Рµ РµС‘ РЅР° РїСЂРёРµРјР»РµРјРѕРµ Р·РЅР°С‡РµРЅРёРµ.", L"РћС€РёР±РєР° РјРѕРґСѓР»СЏ D3D9Wnd", MB_OK | MB_ICONERROR);
+	else if (GameLanguage("Italian")) MessageBoxW(0, L"Il gioco non puГІ avviarsi perchГ© la larghezza dello schermo settata ГЁ minore di 143. ГЁ necessario modificarla con un valore piГ№ appropriato.", L"Errore D3D9Wnd", MB_OK | MB_ICONERROR);
+	else MessageBoxA(0, "The game cannot start because the specified screen width is lower than 143. Please change it to an appropriate value.", "D3D9Wnd error", MB_OK | MB_ICONERROR);
 }
 
 void M_WndmodeDetected()
 {
-	if (GameLanguage("Russian")) MessageBox(0, "В вашей папке с W:A присутствуют сразу два модуля оконного режима (D3D9 и wkWndMode). Уберите один из них. Сейчас модуль прекратит свою работу.", "Ошибка", MB_OK | MB_ICONERROR);
-	else if (GameLanguage("Italian")) MessageBox(0, "D3D9 e wkWndMode sono entrambi presenti nella tua cartella. и necessario eliminarne uno.", "Errore Critico.", MB_OK | MB_ICONERROR);
-	else ErrorBox("You have both D3D9 and wkWndMode in your folder. Delete one please.", "Critical failure.");
+	if (GameLanguage("Russian")) MessageBoxW(0, L"Р’ РІР°С€РµР№ РїР°РїРєРµ СЃ W:A РїСЂРёСЃСѓС‚СЃС‚РІСѓСЋС‚ СЃСЂР°Р·Сѓ РґРІР° РјРѕРґСѓР»СЏ РѕРєРѕРЅРЅРѕРіРѕ СЂРµР¶РёРјР° (D3D9 Рё wkWndMode). РЈР±РµСЂРёС‚Рµ РѕРґРёРЅ РёР· РЅРёС…. РЎРµР№С‡Р°СЃ РјРѕРґСѓР»СЊ РїСЂРµРєСЂР°С‚РёС‚ СЃРІРѕСЋ СЂР°Р±РѕС‚Сѓ.", L"РћС€РёР±РєР°", MB_OK | MB_ICONERROR);
+	else if (GameLanguage("Italian")) MessageBoxW(0, L"D3D9 e wkWndMode sono entrambi presenti nella tua cartella. ГЁ necessario eliminarne uno.", L"Errore Critico.", MB_OK | MB_ICONERROR);
+	else ErrorBoxA("You have both D3D9 and wkWndMode in your folder. Delete one please.", "Critical failure.");
 }
 
 void M_D3D9Disabled()
 {
-	if (GameLanguage("Russian")) MessageBox(0, "Пожалуйста, включите один из вариантов Direct3D 9 через меню Дополнительных настроек игры, либо активировав соответствующий скрипт реестра из папки \"Tweaks\". Сейчас модуль прекратит свою работу.", "Ошибка модуля D3D9Wnd", MB_OK | MB_ICONERROR);
-	else if (GameLanguage("Italian")) MessageBox(0, "Per favore abilita uno dei renderer Direct3D 9 in Advanced Settings oppure utilizzando i corrispettivi files presenti nella cartella \"Tweaks\".", "Errore D3D9Wnd", MB_OK | MB_ICONERROR);
-	else ErrorBox("Please enable one of the Direct3D 9 renderers either in Advanced Settings or by using the corresponding files from the \"Tweaks\" folder. I will exit now.", "D3D9Wnd error");
+	if (GameLanguage("Russian")) MessageBoxW(0, L"РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РІРєР»СЋС‡РёС‚Рµ РѕРґРёРЅ РёР· РІР°СЂРёР°РЅС‚РѕРІ Direct3D 9 С‡РµСЂРµР· РјРµРЅСЋ Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹С… РЅР°СЃС‚СЂРѕРµРє РёРіСЂС‹, Р»РёР±Рѕ Р°РєС‚РёРІРёСЂРѕРІР°РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёР№ СЃРєСЂРёРїС‚ СЂРµРµСЃС‚СЂР° РёР· РїР°РїРєРё \"Tweaks\". РЎРµР№С‡Р°СЃ РјРѕРґСѓР»СЊ РїСЂРµРєСЂР°С‚РёС‚ СЃРІРѕСЋ СЂР°Р±РѕС‚Сѓ.", L"РћС€РёР±РєР° РјРѕРґСѓР»СЏ D3D9Wnd", MB_OK | MB_ICONERROR);
+	else if (GameLanguage("Italian")) MessageBoxW(0, L"Per favore abilita uno dei renderer Direct3D 9 in Advanced Settings oppure utilizzando i corrispettivi files presenti nella cartella \"Tweaks\".", L"Errore D3D9Wnd", MB_OK | MB_ICONERROR);
+	else ErrorBoxA("Please enable one of the Direct3D 9 renderers either in Advanced Settings or by using the corresponding files from the \"Tweaks\" folder. I will exit now.", "D3D9Wnd error");
 }
 
 void M_TooOld()
 {
-	if (GameLanguage("Russian")) MessageBox(0, "К сожалению, ваша версия игры слишком старая для того, чтобы использовать D3D9Wnd. Пожалуйста, обновите игру до последней версии.", "У нас проблема, капитан!", MB_OK | MB_ICONERROR);
-	else ErrorBox("Unfortunately, your version of the game is too old for using D3D9Wnd. Please update your game to the latest version.", "No, just no.");
+	if (GameLanguage("Russian")) MessageBoxW(0, L"Рљ СЃРѕР¶Р°Р»РµРЅРёСЋ, РІР°С€Р° РІРµСЂСЃРёСЏ РёРіСЂС‹ СЃР»РёС€РєРѕРј СЃС‚Р°СЂР°СЏ РґР»СЏ С‚РѕРіРѕ, С‡С‚РѕР±С‹ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ D3D9Wnd. РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РѕР±РЅРѕРІРёС‚Рµ РёРіСЂСѓ РґРѕ РїРѕСЃР»РµРґРЅРµР№ РІРµСЂСЃРёРё.", L"РЈ РЅР°СЃ РїСЂРѕР±Р»РµРјР°, РєР°РїРёС‚Р°РЅ!", MB_OK | MB_ICONERROR);
+	else ErrorBoxA("Unfortunately, your version of the game is too old for using D3D9Wnd. Please update your game to the latest version.", "No, just no.");
 }
 
 void M_HardwareCursorsDisabled()
 {
 	if (GameLanguage("Russian"))
-		InfoBox(
-			"Аппаратный курсор мыши был отключён, чтобы Растянутое/Центрированное меню работало корректно. "
-			"Чтобы вернуть аппаратный курсор мыши назад, выключите Растянутое/Центрированное меню в файле "
-			"настроек модуля и снова включите аппаратный курсор мыши. Эти опции более не рекомендуются. "
-			"Рекомендуем попробовать SuperFrontendHD взамен этих опций.",
-			"Оповещение модуля D3D9Wnd");
-//	else if (GameLanguage("Italian")) MessageBox(0, "Ho disabilitato il cursore per permettere il funzionamento della modalitа estesa.", "Informazione D3D9Wnd", MB_OK | MB_ICONINFORMATION);
+		InfoBoxW(
+			L"РђРїРїР°СЂР°С‚РЅС‹Р№ РєСѓСЂСЃРѕСЂ РјС‹С€Рё Р±С‹Р» РѕС‚РєР»СЋС‡С‘РЅ, С‡С‚РѕР±С‹ Р Р°СЃС‚СЏРЅСѓС‚РѕРµ/Р¦РµРЅС‚СЂРёСЂРѕРІР°РЅРЅРѕРµ РјРµРЅСЋ СЂР°Р±РѕС‚Р°Р»Рѕ РєРѕСЂСЂРµРєС‚РЅРѕ. "
+			"Р§С‚РѕР±С‹ РІРµСЂРЅСѓС‚СЊ Р°РїРїР°СЂР°С‚РЅС‹Р№ РєСѓСЂСЃРѕСЂ РјС‹С€Рё РЅР°Р·Р°Рґ, РІС‹РєР»СЋС‡РёС‚Рµ Р Р°СЃС‚СЏРЅСѓС‚РѕРµ/Р¦РµРЅС‚СЂРёСЂРѕРІР°РЅРЅРѕРµ РјРµРЅСЋ РІ С„Р°Р№Р»Рµ "
+			"РЅР°СЃС‚СЂРѕРµРє РјРѕРґСѓР»СЏ Рё СЃРЅРѕРІР° РІРєР»СЋС‡РёС‚Рµ Р°РїРїР°СЂР°С‚РЅС‹Р№ РєСѓСЂСЃРѕСЂ РјС‹С€Рё. Р­С‚Рё РѕРїС†РёРё Р±РѕР»РµРµ РЅРµ СЂРµРєРѕРјРµРЅРґСѓСЋС‚СЃСЏ. "
+			"Р РµРєРѕРјРµРЅРґСѓРµРј РїРѕРїСЂРѕР±РѕРІР°С‚СЊ SuperFrontendHD РІР·Р°РјРµРЅ СЌС‚РёС… РѕРїС†РёР№.",
+			L"РћРїРѕРІРµС‰РµРЅРёРµ РјРѕРґСѓР»СЏ D3D9Wnd");
+//	else if (GameLanguage("Italian")) MessageBox(0, "Ho disabilitato il cursore per permettere il funzionamento della modalitГ  estesa.", "Informazione D3D9Wnd", MB_OK | MB_ICONINFORMATION);
 	else
-		InfoBox(
+		InfoBoxA(
 			"I have disabled the Hardware Cursors to allow Stretched/Centered Frontend to work. In order to get "
 			"Hardware Cursors back, please disable Stretched/Centered Frontend in the ini file. These options "
 			"are now deprecated, please take a look at SuperFrontendHD instead of these options.",
@@ -52,37 +52,37 @@ void M_HardwareCursorsDisabled()
 
 void M_RecommendHardwareCursorsDisable()
 {
-	if (GameLanguage("Russian")) MessageBox(0, "Для правильной работы растянутого/центрированного/пользовательского меню следует отключить опцию \"Аппаратный курсор мыши\" в дополнительных настройках игры.", "Оповещение модуля D3D9Wnd", MB_OK | MB_ICONWARNING);
-	else WarningBox("In order for the stretched/centered/custom frontend to work properly, please disable \"Hardware Cursors\" in the Advanced Options screen.", "D3D9Wnd information");
+	if (GameLanguage("Russian")) MessageBoxW(0, L"Р”Р»СЏ РїСЂР°РІРёР»СЊРЅРѕР№ СЂР°Р±РѕС‚С‹ СЂР°СЃС‚СЏРЅСѓС‚РѕРіРѕ/С†РµРЅС‚СЂРёСЂРѕРІР°РЅРЅРѕРіРѕ/РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРѕРіРѕ РјРµРЅСЋ СЃР»РµРґСѓРµС‚ РѕС‚РєР»СЋС‡РёС‚СЊ РѕРїС†РёСЋ \"РђРїРїР°СЂР°С‚РЅС‹Р№ РєСѓСЂСЃРѕСЂ РјС‹С€Рё\" РІ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹С… РЅР°СЃС‚СЂРѕР№РєР°С… РёРіСЂС‹.", L"РћРїРѕРІРµС‰РµРЅРёРµ РјРѕРґСѓР»СЏ D3D9Wnd", MB_OK | MB_ICONWARNING);
+	else WarningBoxA("In order for the stretched/centered/custom frontend to work properly, please disable \"Hardware Cursors\" in the Advanced Options screen.", "D3D9Wnd information");
 }
 
 void M_SetMultiMonResLight(int nWidth, int nHeight)
 {
-	if (GameLanguage("Russian")) Mprintfi("Оповещение модуля D3D9Wnd", "Привет, и спасибо, что пользуетесь опцией мультимониторного отображения игры. Я задал разрешение вашей игры на %ux%u. Пожалуйста, перезапустите игру, чтобы подтвердить изменения.", nWidth, nHeight);
-	else Mprintfi("D3D9Wnd information", "Hello, and thanks for using the Multi-Monitor feature of D3D9Wnd. I have set your game resolution to %ux%u. Please restart the game to confirm the changes.", nWidth, nHeight);
+	if (GameLanguage("Russian")) MprintfiW(L"РћРїРѕРІРµС‰РµРЅРёРµ РјРѕРґСѓР»СЏ D3D9Wnd", L"РџСЂРёРІРµС‚, Рё СЃРїР°СЃРёР±Рѕ, С‡С‚Рѕ РїРѕР»СЊР·СѓРµС‚РµСЃСЊ РѕРїС†РёРµР№ РјСѓР»СЊС‚РёРјРѕРЅРёС‚РѕСЂРЅРѕРіРѕ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ РёРіСЂС‹. РЇ Р·Р°РґР°Р» СЂР°Р·СЂРµС€РµРЅРёРµ РІР°С€РµР№ РёРіСЂС‹ РЅР° %ux%u. РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РїРµСЂРµР·Р°РїСѓСЃС‚РёС‚Рµ РёРіСЂСѓ, С‡С‚РѕР±С‹ РїРѕРґС‚РІРµСЂРґРёС‚СЊ РёР·РјРµРЅРµРЅРёСЏ.", nWidth, nHeight);
+	else MprintfiA("D3D9Wnd information", "Hello, and thanks for using the Multi-Monitor feature of D3D9Wnd. I have set your game resolution to %ux%u. Please restart the game to confirm the changes.", nWidth, nHeight);
 }
 
 void M_LowBPP(UINT dwDepth)
 {
-	if (GameLanguage("Russian")) Mprintfe("Ошибка модуля D3D9Wnd", "Извините, но глубина цвета в вашей системе (%u битов на пиксель) слишком низкая для того, чтобы использовать D3D9Wnd. Пожалуйста, задайте глубину цвета хотя бы на 32 бита на пиксель.", dwDepth);
-	else Mprintfe("D3D9Wnd error", "Sorry, but the colour depth of your system (%u bits per pixel) is too low for using D3D9Wnd. Please set colour depth to at least 32 bits per pixel.", dwDepth);
+	if (GameLanguage("Russian")) MprintfeW(L"РћС€РёР±РєР° РјРѕРґСѓР»СЏ D3D9Wnd", L"РР·РІРёРЅРёС‚Рµ, РЅРѕ РіР»СѓР±РёРЅР° С†РІРµС‚Р° РІ РІР°С€РµР№ СЃРёСЃС‚РµРјРµ (%u Р±РёС‚РѕРІ РЅР° РїРёРєСЃРµР»СЊ) СЃР»РёС€РєРѕРј РЅРёР·РєР°СЏ РґР»СЏ С‚РѕРіРѕ, С‡С‚РѕР±С‹ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ D3D9Wnd. РџРѕР¶Р°Р»СѓР№СЃС‚Р°, Р·Р°РґР°Р№С‚Рµ РіР»СѓР±РёРЅСѓ С†РІРµС‚Р° С…РѕС‚СЏ Р±С‹ РЅР° 32 Р±РёС‚Р° РЅР° РїРёРєСЃРµР»СЊ.", dwDepth);
+	else MprintfeA("D3D9Wnd error", "Sorry, but the colour depth of your system (%u bits per pixel) is too low for using D3D9Wnd. Please set colour depth to at least 32 bits per pixel.", dwDepth);
 }
 
 void M_UnsupportedFullscreenFrontend(int nWidth, int nHeight, LONG dwErrorCode)
 {
 	if (GameLanguage("Russian"))
-		Mprintf(MB_OK | MB_ICONWARNING | MB_TOPMOST, "Предупреждение модуля D3D9Wnd",
-			"Внимание: не удалось перевести игру в полноэкранный режим с разрешением %ux%u.\n"
-			"Ошибка: %s\n"
-			"Возможно, это разрешение не поддерживается вашей системой, монитором или "
-			"видеокартой/драйверами. Сейчас произойдёт переключение в оконный режим.\n"
+		MprintfW(MB_OK | MB_ICONWARNING | MB_TOPMOST, L"РџСЂРµРґСѓРїСЂРµР¶РґРµРЅРёРµ РјРѕРґСѓР»СЏ D3D9Wnd",
+			L"Р’РЅРёРјР°РЅРёРµ: РЅРµ СѓРґР°Р»РѕСЃСЊ РїРµСЂРµРІРµСЃС‚Рё РёРіСЂСѓ РІ РїРѕР»РЅРѕСЌРєСЂР°РЅРЅС‹Р№ СЂРµР¶РёРј СЃ СЂР°Р·СЂРµС€РµРЅРёРµРј %ux%u.\n"
+			"РћС€РёР±РєР°: %s\n"
+			"Р’РѕР·РјРѕР¶РЅРѕ, СЌС‚Рѕ СЂР°Р·СЂРµС€РµРЅРёРµ РЅРµ РїРѕРґРґРµСЂР¶РёРІР°РµС‚СЃСЏ РІР°С€РµР№ СЃРёСЃС‚РµРјРѕР№, РјРѕРЅРёС‚РѕСЂРѕРј РёР»Рё "
+			"РІРёРґРµРѕРєР°СЂС‚РѕР№/РґСЂР°Р№РІРµСЂР°РјРё. РЎРµР№С‡Р°СЃ РїСЂРѕРёР·РѕР№РґС‘С‚ РїРµСЂРµРєР»СЋС‡РµРЅРёРµ РІ РѕРєРѕРЅРЅС‹Р№ СЂРµР¶РёРј.\n"
 			"\n"
-			"Чтобы в будущем избежать подобных ошибок, отключите опции \"Fullscreen\" и "
-			"\"FullscreenAlternative\" в разделе [FrontendSettings] файла D3D9Wnd.ini, "
-			"либо задайте разрешение меню на поддерживаемое при помощи сторонних модулей "
-			"(например, SuperFrontendHD).",
-		nWidth, nHeight, DispChangeErrorStrA(dwErrorCode));
-	else Mprintf(MB_OK | MB_ICONWARNING | MB_TOPMOST, "D3D9Wnd warning",
+			"Р§С‚РѕР±С‹ РІ Р±СѓРґСѓС‰РµРј РёР·Р±РµР¶Р°С‚СЊ РїРѕРґРѕР±РЅС‹С… РѕС€РёР±РѕРє, РѕС‚РєР»СЋС‡РёС‚Рµ РѕРїС†РёРё \"Fullscreen\" Рё "
+			"\"FullscreenAlternative\" РІ СЂР°Р·РґРµР»Рµ [FrontendSettings] С„Р°Р№Р»Р° D3D9Wnd.ini, "
+			"Р»РёР±Рѕ Р·Р°РґР°Р№С‚Рµ СЂР°Р·СЂРµС€РµРЅРёРµ РјРµРЅСЋ РЅР° РїРѕРґРґРµСЂР¶РёРІР°РµРјРѕРµ РїСЂРё РїРѕРјРѕС‰Рё СЃС‚РѕСЂРѕРЅРЅРёС… РјРѕРґСѓР»РµР№ "
+			"(РЅР°РїСЂРёРјРµСЂ, SuperFrontendHD).",
+		nWidth, nHeight, DispChangeErrorStrW(dwErrorCode));
+	else MprintfA(MB_OK | MB_ICONWARNING | MB_TOPMOST, "D3D9Wnd warning",
 			"Warning: failed to set the required screen resolution of %ux%u for frontend.\n"
 			"Error: %s\n"
 			"It's probably unsupported by your system, monitor or GPU/drivers. Switching to windowed mode.\n"
@@ -96,18 +96,18 @@ void M_UnsupportedFullscreenFrontend(int nWidth, int nHeight, LONG dwErrorCode)
 void M_GoodbyeCustomSize()
 {
 	if (GameLanguage("Russian"))
-		InfoBox(
-			"Спасибо за использование опции EnableCustomSize. Эта опция более недоступна в D3D9Wnd, "
-			"так как для этого теперь есть модуль SuperFrontendHD. Чтобы запустить ваше меню с "
-			"выбранными размерами экрана, пожалуйста скачайте и установите SuperFrontendHD. "
-			"Документацию вы сможете найти в прилагающемся архиве, а также на вики-ресурсе "
-			"Worms2D.info и пользовательских форумах.\n"
+		InfoBoxW(
+			L"РЎРїР°СЃРёР±Рѕ Р·Р° РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ РѕРїС†РёРё EnableCustomSize. Р­С‚Р° РѕРїС†РёСЏ Р±РѕР»РµРµ РЅРµРґРѕСЃС‚СѓРїРЅР° РІ D3D9Wnd, "
+			"С‚Р°Рє РєР°Рє РґР»СЏ СЌС‚РѕРіРѕ С‚РµРїРµСЂСЊ РµСЃС‚СЊ РјРѕРґСѓР»СЊ SuperFrontendHD. Р§С‚РѕР±С‹ Р·Р°РїСѓСЃС‚РёС‚СЊ РІР°С€Рµ РјРµРЅСЋ СЃ "
+			"РІС‹Р±СЂР°РЅРЅС‹РјРё СЂР°Р·РјРµСЂР°РјРё СЌРєСЂР°РЅР°, РїРѕР¶Р°Р»СѓР№СЃС‚Р° СЃРєР°С‡Р°Р№С‚Рµ Рё СѓСЃС‚Р°РЅРѕРІРёС‚Рµ SuperFrontendHD. "
+			"Р”РѕРєСѓРјРµРЅС‚Р°С†РёСЋ РІС‹ СЃРјРѕР¶РµС‚Рµ РЅР°Р№С‚Рё РІ РїСЂРёР»Р°РіР°СЋС‰РµРјСЃСЏ Р°СЂС…РёРІРµ, Р° С‚Р°РєР¶Рµ РЅР° РІРёРєРё-СЂРµСЃСѓСЂСЃРµ "
+			"Worms2D.info Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРёС… С„РѕСЂСѓРјР°С….\n"
 			"\n"
-			"Чтобы в будущем избежать подобных оповещений, пожалуйста, задайте EnableCustomSize на 0 "
-			"в вашем файле D3D9Wnd.ini.",
-			"Уведомление D3D9Wnd");
+			"Р§С‚РѕР±С‹ РІ Р±СѓРґСѓС‰РµРј РёР·Р±РµР¶Р°С‚СЊ РїРѕРґРѕР±РЅС‹С… РѕРїРѕРІРµС‰РµРЅРёР№, РїРѕР¶Р°Р»СѓР№СЃС‚Р°, Р·Р°РґР°Р№С‚Рµ EnableCustomSize РЅР° 0 "
+			"РІ РІР°С€РµРј С„Р°Р№Р»Рµ D3D9Wnd.ini.",
+			L"РЈРІРµРґРѕРјР»РµРЅРёРµ D3D9Wnd");
 	else
-		InfoBox(
+		InfoBoxA(
 			"Thank you for using the EnableCustomSize option. This option has now been superseded "
 			"by SuperFrontendHD, and is thus no longer available in D3D9Wnd. In order to run your "
 			"frontend at a custom size, please download and install SuperFrontendHD. Documentation "
