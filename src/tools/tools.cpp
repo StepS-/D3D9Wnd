@@ -5,7 +5,6 @@
 QWORD GetModuleVersion(HMODULE hModule)
 {
 	char WApath[MAX_PATH]; DWORD h;
-	WORD V1,V2,V3,V4;
 	GetModuleFileNameA(hModule,WApath,MAX_PATH);
 	DWORD Size = GetFileVersionInfoSizeA(WApath,&h);
 	if(Size)
@@ -17,11 +16,7 @@ QWORD GetModuleVersion(HMODULE hModule)
 		{
 			if(Info->dwSignature==0xFEEF04BD)
 			{
-				V1=HIWORD(Info->dwFileVersionMS);
-				V2=LOWORD(Info->dwFileVersionMS);
-				V3=HIWORD(Info->dwFileVersionLS);
-				V4=LOWORD(Info->dwFileVersionLS);
-					return MAKEQWORD(V1, V2, V3, V4);
+				return MAKELONGLONG(Info->dwFileVersionLS, Info->dwFileVersionMS);
 			}
 		}
 		free(Buf);

@@ -43,7 +43,7 @@ BOOL InitializeD3D9Wnd()
 
 	WA.Version = GetWAVersion();
 	fFileLog("Detected the game version: %u.%u.%u.%u",
-		PWORD(&WA.Version)[2], PWORD(&WA.Version)[3], PWORD(&WA.Version)[0], PWORD(&WA.Version)[1]);
+		PWORD(&WA.Version)[3], PWORD(&WA.Version)[2], PWORD(&WA.Version)[1], PWORD(&WA.Version)[0]);
 
 	if (WA.Version < QV(3,7,2,48))
 	{

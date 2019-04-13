@@ -23,9 +23,9 @@ extern "C" IMAGE_DOS_HEADER __ImageBase;
 #define IJ_PUSHRET 4 //Insert a pushret with InsertJump
 
 #define AlignInteger(num, mod) (num + (mod * ((num % mod) != 0) - (num % mod)))
-#define MAKELONGLONG(hi,lo) ((LONGLONG(DWORD(hi) & 0xffffffff) << 32 ) | LONGLONG(DWORD(lo) & 0xffffffff))
+#define MAKELONGLONG(lo,hi) ((LONGLONG(DWORD(lo) & 0xffffffff)) | LONGLONG(DWORD(hi) & 0xffffffff) << 32 )
 #define LineGetSubPos(SBig, SSmall) ((SBig - SSmall)/2)
-#define MAKEQWORD(HI1, LO1, HI2, LO2) MAKELONGLONG(MAKELONG(HI1,LO1),MAKELONG(HI2,LO2))
+#define MAKEQWORD(LO2, HI2, LO1, HI1) MAKELONGLONG(MAKELONG(LO2,HI2),MAKELONG(LO1,HI1))
 #define KeyPressed(k) (GetAsyncKeyState(k) < 0)
 #define EnforceRange(val, v_min, v_max) (val < v_min ? v_min : val > v_max ? v_max : val)
 #define MinCap(nSize, nMin) (nSize < nMin ? nMin : nSize)
@@ -35,7 +35,7 @@ extern "C" IMAGE_DOS_HEADER __ImageBase;
 #define GetWAVersion GetExeVersion
 #define ShowCursorCount GetCursorCounter
 #define ShowCursorN SetCursorCounter
-#define QV MAKEQWORD
+#define QV(V1, V2, V3, V4) MAKEQWORD(V4, V3, V2, V1)
 
 #define VMTEntry(ObjPtr, EntryNum) (*(PVOID*)(*(PULONG_PTR)ObjPtr + EntryNum*sizeof(ULONG_PTR)))
 
