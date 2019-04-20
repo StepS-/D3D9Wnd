@@ -150,7 +150,7 @@ QWORD GetFileSizeQ(HANDLE hFile)
 {
 	DWORD low, high;
 	low = GetFileSize(hFile, &high);
-	return MAKELONGLONG(high, low);
+	return MAKELONGLONG(low, high);
 }
 
 BOOL __stdcall PatchMemData(PVOID pAddr, size_t buf_len, PVOID pNewData, size_t data_len)
